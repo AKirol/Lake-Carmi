@@ -20,12 +20,12 @@ library(kableExtra)
 
 
 #Access .csv via github.
-urlfile = "https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/Carmi%20Data%20-%20Carmi%20Latest%20Data.csv"
-carmidata <- read.csv(url(urlfile))
+urlfile = "https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/CarmiData-LatestPFLData.csv"
+carmidata <- read.csv(url(urlfile), skip=1)
 
-meturl = "https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/Carmi%20Data%20-%20CarmiMet.csv"
+meturl = "https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/CarmiData-LatestMetData.csv"
 carmimet <- read.csv(url(meturl))
-mettable <- carmimet[,c(3,7,9)]
+mettable <- carmimet[,c(3,4,9)]
 
 #Rename columns to be used
 names(carmidata)[1] <- "Date"
@@ -36,8 +36,8 @@ names(carmidata)[20] <- "PC"
 names(carmidata)[21] <- "depth"
 
 #Remove rows without data.
-carmidata <- subset(carmidata, Date !="TIMESTAMP" & Date !="TS")
-carmidata <- subset(carmidata, CR1000 !="Smp")
+# carmidata <- subset(carmidata, Date !="TIMESTAMP" & Date !="TS")
+# carmidata <- subset(carmidata, CR1000 !="Smp")
 
 #Format date column
 carmidata$Date <- strptime(carmidata$Date, "%Y-%m-%d %H:%M:%S")
