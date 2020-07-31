@@ -1,0 +1,139 @@
+---
+title: "UVM Lake Carmi Platform Data"
+output:
+  html_document: default
+  pdf_document: default
+---
+## Recent Lake Conditions
+<img align="right" height="320" src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/Platform.png">
+
+```{r,echo=FALSE, message=FALSE,warning=FALSE}
+#Code to pull csv data, create current condition table:
+
+#Install + load ggplot2, htmlwidgets, knitr, devtools, plotly, kableExtra
+library(ggplot2)
+library(htmlwidgets)
+library(knitr)
+library(devtools)
+library(plotly) 
+library(kableExtra)
+
+
+#Access .csv via github.
+urlfile = "https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/Carmi%20Data%20-%20Carmi%20Latest%20Data.csv"
+carmidata <- read.csv(url(urlfile))
+
+meturl = "https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/Carmi%20Data%20-%20CarmiMet.csv"
+carmimet <- read.csv(url(meturl))
+mettable <- carmimet[,c(3,7,9)]
+
+#Rename columns to be used
+names(carmidata)[1] <- "Date"
+names(carmidata)[6] <- "Temp"
+names(carmidata)[16] <- "DO"
+names(carmidata)[18] <- "Chl"
+names(carmidata)[20] <- "PC"
+names(carmidata)[21] <- "depth"
+
+#Remove rows without data.
+carmidata <- subset(carmidata, Date !="TIMESTAMP" & Date !="TS")
+carmidata <- subset(carmidata, CR1000 !="Smp")
+
+#Format date column
+carmidata$Date <- strptime(carmidata$Date, "%Y-%m-%d %H:%M:%S")
+carmidata$Date<- as.POSIXct(carmidata$Date)
+
+#Format columns as numeric
+carmidata$DO <- as.numeric(carmidata$DO)
+carmidata$depth <- as.numeric(carmidata$depth)
+carmidata$Chl <- as.numeric(carmidata$Chl)
+carmidata$PC <- as.numeric(carmidata$PC)
+carmidata$Temp <- as.numeric(carmidata$Temp)
+
+#Create new dataset with Date, Temp, DO, depth columns.
+CarmiDO <- carmidata[,c(1,6,16,21)]
+
+
+#Subset surface and bottom DO measurements
+Surface <- subset(CarmiDO,depth<0.8)
+Bottom <- subset(CarmiDO,depth>8.3)
+
+#Pull data for recent conditions table, rename, format
+mytable <- tail(Surface,1)
+mytable <- mytable[,c(1,2)]
+names(mytable)[1] <- "Last Collection"
+names(mytable)[2] <- "Surface Temperature (*C)"
+mytable$BottomTemp <- tail(Bottom$Temp,1)
+names(mytable)[3] <- "Bottom Temperature (*C)"
+mytable$SurfaceDO <- tail(Surface$DO,1)
+names(mytable)[4] <- "Surface Dissolved Oxygen (mg/L)"
+mytable$BottomDO <- tail(Bottom$DO,1)
+names(mytable)[5] <- "Bottom Dissolved Oxygen (mg/L)"
+mytable$`Last Collection` <-format(mytable$`Last Collection`,format='%B %d, %Y %H:00')
+mytable$Air <- tail(mettable$Temperature..S.THB.10979906.10974876.1....C..Bree_met_5,1)
+names(mytable)[6] <- "Air Temperature (*C)"
+mytable$WS <- tail(mettable$Wind.Speed..S.WSB.10979906.10955814.1...m.s..Bree_met_5,1)
+names(mytable)[7] <- "Wind Speed (m/s)"
+mytable$`Wind Speed (m/s)`<- as.numeric(mytable$`Wind Speed (m/s)`)
+mytable$mph <- tail(mytable$`Wind Speed (m/s)`,1)
+mytable$mph <- mytable$mph*2.237
+mytable$mph <- round(mytable$mph,digits=1)
+names(mytable)[8] <- "Wind Speed (mph)"
+mytable$Wdir <- tail(mettable$Wind.Direction..S.WDA.10979906.10969970.1......Bree_met_5,1)
+names(mytable)[9] <- "Wind Direction"
+mytable$`Wind Direction` <- as.numeric(mytable$`Wind Direction`)
+
+#Wind Degree to Cardinal Function
+d2c.2 <- function(x) {
+  upper <- seq(from = 11.25, by = 22.5, length.out = 17)
+  card1 <- c('N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW', 'N')
+  ifelse(x>360 | x<0,NA,card1[findInterval(x,upper,rightmost.closed = T)+1])
+}
+
+mytable$`Wind Direction` <- d2c.2(mytable$`Wind Direction`)
+
+#Format table for printing
+rownames(mytable) <- c(" ")
+mytable <- t(mytable)
+kable(mytable, align='r') %>% kable_styling(bootstrap_options = c("striped", "hover"),
+                full_width = F,
+                font_size = 12,
+                position = "left")
+
+```
+
+<br>
+<br>
+   
+## Lake Condition Plots
+```{r, echo=FALSE, message=FALSE}
+#Plot Setup
+#Subset surface and bottom DO measurements
+DOPlot <- subset(CarmiDO,depth>8.3 | depth<0.8)
+DOPlot$Depth <- ifelse(DOPlot$depth<5, "UVM Buoy Site Surface (0.5 meter depth)", "UVM Buoy Site Bottom (8.5 meter depth)")
+
+#Create new dataset with Date, BGA PC, depth columns.
+CarmiPC<-carmidata[,c(1,18,20,21)]
+
+#Subset surface BGA PC measurements
+PCPlot <- subset(CarmiPC,depth<0.8)
+
+#GGPlot Setup (DO)
+DO <- ggplot(DOPlot, aes(x=Date,y=DO)) + geom_line(aes(col=Depth)) + labs(title="Lake Carmi Dissolved Oxygen", y="DO (mg/L)", x="Date") + scale_y_continuous(breaks=seq(0,16,2), expand = c(0, 0), limits = c(0, 12)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_manual(labels = c("UVM Buoy Site Surface (0.5 meter depth)", "UVM Buoy Site Bottom (8.5 meter depth)"), values=(c("UVM Buoy Site Surface (0.5 meter depth)"="blue", "UVM Buoy Site Bottom (8.5 meter depth)"="red")))
+ggplotly(DO) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
+  
+
+#GGPlot Setup (Temp)
+CTemp <- ggplot(DOPlot, aes(x=Date,y=Temp)) + geom_line(aes(col=Depth)) + labs(title="Lake Carmi Water Temperature", y="Temperature (*C)", x="Date") + scale_y_continuous(breaks=seq(0,40,2)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_manual(labels = c("UVM Buoy Site Surface (0.5 meter depth)", "UVM Buoy Site Bottom (8.5 meter depth)"), values=(c("UVM Buoy Site Surface (0.5 meter depth)"="blue", "UVM Buoy Site Bottom (8.5 meter depth)"="red")))
+ggplotly(CTemp) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
+
+#GGPlot Setup (PC)
+PC <- ggplot(PCPlot, aes(x=Date,y=PC)) + geom_line(colour="blue") + labs(title="Lake Carmi Blue Green Algae Phycocyanin", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,4.0,0.5), limits = c(0, 4.0))
+
+ggplotly(PC)
+
+
+#GGPlot Setup (Chl)
+Chl <- ggplot(PCPlot, aes(x=Date,y=Chl)) + geom_line(colour="blue") + labs(title="Lake Carmi Chlorophyll", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,4.0,1), limits = c(0, 4.0))
+
+ggplotly(Chl)
