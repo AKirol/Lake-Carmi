@@ -1,0 +1,2 @@
+Line#,Date,"Wind Speed (S-WSB 10979906:10955814-1), m/s, Bree_met_5","Gust Speed (S-WSB 10979906:10955814-2), m/s, Bree_met_5","PAR (S-LIA 10979906:10962914-1), uE, Bree_met_5","Solar Radiation (S-LIB 10979906:10969905-1), W/m^2, Bree_met_5","Wind Direction (S-WDA 10979906:10969970-1), *, Bree_met_5","Pressure (S-BPB 10979906:10972867-1), mbar, Bree_met_5","Temperature (S-THB 10979906:10974876-1), *C, Bree_met_5","RH (S-THB 10979906:10974876-2), %, Bree_met_5","Dew Point (S-THB 10979906:10974876-3), *C, Bree_met_5"
+9,08/04/20 16:10:00,4,5.5,79,32,83,999.2,20.22,91.4,18.8
