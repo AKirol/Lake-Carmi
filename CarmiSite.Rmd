@@ -25,7 +25,8 @@ carmidata <- read.csv(url(urlfile), skip=1)
 
 meturl = "https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/CarmiData-LatestMetData.csv"
 carmimet <- read.csv(url(meturl))
-mettable <- carmimet[,c(3,4,9)]
+#mettable <- carmimet[,c(3,4,9)]
+mettable <- carmimet
 
 #Rename columns to be used
 names(carmidata)[1] <- "Date"
@@ -70,16 +71,16 @@ names(mytable)[4] <- "Surface Dissolved Oxygen (mg/L)"
 mytable$BottomDO <- tail(Bottom$DO,1)
 names(mytable)[5] <- "Bottom Dissolved Oxygen (mg/L)"
 mytable$`Last Collection` <-format(mytable$`Last Collection`,format='%B %d, %Y %H:00')
-mytable$Air <- tail(mettable$Temperature..S.THB.10979906.10974876.1....C..Bree_met_5,1)
+mytable$Air <- tail(mettable$Temperature,1)
 names(mytable)[6] <- "Air Temperature (*C)"
-mytable$WS <- tail(mettable$Wind.Speed..S.WSB.10979906.10955814.1...m.s..Bree_met_5,1)
+mytable$WS <- tail(mettable$Wind.Speed,1)
 names(mytable)[7] <- "Wind Speed (m/s)"
 mytable$`Wind Speed (m/s)`<- as.numeric(mytable$`Wind Speed (m/s)`)
 mytable$mph <- tail(mytable$`Wind Speed (m/s)`,1)
 mytable$mph <- mytable$mph*2.237
 mytable$mph <- round(mytable$mph,digits=1)
 names(mytable)[8] <- "Wind Speed (mph)"
-mytable$Wdir <- tail(mettable$Wind.Direction..S.WDA.10979906.10969970.1......Bree_met_5,1)
+mytable$Wdir <- tail(mettable$Wind.Direction,1)
 names(mytable)[9] <- "Wind Direction"
 mytable$`Wind Direction` <- as.numeric(mytable$`Wind Direction`)
 
