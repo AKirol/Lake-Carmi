@@ -5,7 +5,8 @@ output:
   pdf_document: default
 ---
 ## Recent Lake Conditions
-<img align="right" height="320" src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/Platform.png">
+<span style="font-size: 10pt;">Updated at 8:30, 12:30, and 16:30 each day</span>
+<img align="right" height="320" src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/images/platform.png">
 
 ```{r,echo=FALSE, message=FALSE,warning=FALSE}
 #Code to pull csv data, create current condition table:
@@ -18,11 +19,10 @@ library(devtools)
 library(plotly) 
 library(kableExtra)
 
-#Access .csv via github.
-urlfile = "https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/CarmiData-LatestPFLData.csv"
+urlfile = "http://epscor.uvm.edu/LakeCarmi/CarmiData-LatestPFLData.csv"
 carmidata <- read.csv(url(urlfile), skip=1)
 
-meturl = "https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/CarmiData-LatestMetData.csv"
+meturl = "http://epscor.uvm.edu/LakeCarmi/CarmiData-LatestMetData.csv"
 carmimet <- read.csv(url(meturl), stringsAsFactors = F)
 #mettable <- carmimet[,c(3,4,9)]
 mettable <- carmimet
@@ -114,6 +114,7 @@ kable(mytable, align='r') %>% kable_styling(bootstrap_options = c("striped", "ho
    
 ## Lake Condition Plots
 (note: click the legend to remove depths from a plot for a cleaner look)
+
 ```{r, echo=FALSE, message=FALSE}
 #Plot Setup
 #Subset surface and bottom DO measurements
@@ -168,3 +169,7 @@ ggplotly(PC)
 Chl <- ggplot(PCPlot, aes(x=Date,y=Chl)) + geom_line(colour="skyblue2") + labs(title="Lake Carmi Chlorophyll (~0.5 meters)", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,4.0,1), limits = c(0, 4.0))
 
 ggplotly(Chl)
+```
+<p style="text-align:center">Please contact us at ashton.kirol@gmail.com and andrew.schroth@uvm.edu with any questions or comments.</p>
+
+<table style="width: 80%; border: 0px; margin-left:auto; margin-right:auto"><tr><td><img src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/images/NSF.png" style="width: 300px"></td><td style="vertical-align: middle">This material is based upon work supported by the National Science Foundation under VT EPSCoR Grant No. NSF OIA-1556770. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation.</td></tr></table>
