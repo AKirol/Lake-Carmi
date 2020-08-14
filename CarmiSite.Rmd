@@ -112,15 +112,15 @@ metDate <- as.POSIXct(metDate)
 mytable$metCollection = format(metDate, format='%B %d, %Y %H:%M', tz="")
 names(mytable)[6] <- "Last Met Collection"
 mytable$Air <- tail(mettable$Temperature,1)
-mytable$Air <- round(mytable$Air,digits=1)
+mytable$Air <- round(mytable$Air,digits=2)
 names(mytable)[7] <- "Air Temperature (*C)"
 mytable$WS <- tail(mettable$Wind.Speed,1)
-mytable$WS <- round(mytable$WS,digits=1)
+mytable$WS <- round(mytable$WS,digits=2)
 names(mytable)[8] <- "Wind Speed (m/s)"
 mytable$`Wind Speed (m/s)`<- as.numeric(mytable$`Wind Speed (m/s)`)
 mytable$mph <- tail(mytable$`Wind Speed (m/s)`,1)
 mytable$mph <- mytable$mph*2.237
-mytable$mph <- round(mytable$mph,digits=1)
+mytable$mph <- round(mytable$mph,digits=2)
 names(mytable)[9] <- "Wind Speed (mph)"
 mytable$Wdir <- tail(mettable$Wind.Direction,1)
 names(mytable)[10] <- "Wind Direction"
