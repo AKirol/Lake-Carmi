@@ -203,6 +203,7 @@ ggplotly(Chl)
 <p style="text-align:center">Please contact us at ashton.kirol@uvm.edu.com and andrew.schroth@uvm.edu with any questions or comments.</p>
 
 <table style="width: 80%; border: 0px; margin-left:auto; margin-right:auto"><tr><td><img src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/images/NSF.png" style="width: 300px"></td><td style="vertical-align: middle">These data and infrastructure are also sourced in research support provided to Andrew Schroth by the National Science Foundation under under VT EPSCoR Grant No. NSF OIA-1556770 and EAR-1561014. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation.</td></tr></table>
+<br>
 
 <script>
 document.getElementById('cover-spin').style.display = 'none';
