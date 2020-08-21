@@ -1,0 +1,218 @@
+---
+title: "UVM St Albans and Missisqoui Bay Platform Data"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+<!--Spinner code below from:
+  http://www.menucool.com/9499/CSS-loading-spinner-with-a-semi-transparent-background-->
+
+<style>
+#cover-spin {
+    position:fixed;
+    width:100%;
+    left:0;right:0;top:0;bottom:0;
+    background-color: rgba(255,255,255,0.7);
+    z-index:9999;
+    display:none;
+}
+
+@-webkit-keyframes spin {
+  from {-webkit-transform:rotate(0deg);}
+  to {-webkit-transform:rotate(360deg);}
+}
+
+@keyframes spin {
+  from {transform:rotate(0deg);}
+  to {transform:rotate(360deg);}
+}
+
+#cover-spin::after {
+    content:'';
+    display:block;
+    position:absolute;
+    left:48%;top:40%;
+    width:40px;height:40px;
+    border-style:solid;
+    border-color:black;
+    border-top-color:transparent;
+    border-width: 4px;
+    border-radius:50%;
+    -webkit-animation: spin .8s linear infinite;
+    animation: spin .8s linear infinite;
+}
+</style>
+
+<div id="cover-spin"></div>
+
+<script>
+document.getElementById('cover-spin').style.display = 'block';
+</script>
+
+<h2>Recent Lake Conditions</h2>
+<span style="font-size: 10pt;">Updated at 8:30, 12:30, and 16:30 each day</span>
+<img align="right" height="320" src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/images/platform.png">
+
+```{r,echo=FALSE, message=FALSE,warning=FALSE}
+#Code to pull csv data, create current condition table:
+#Install + load ggplot2, htmlwidgets, knitr, devtools, plotly, kableExtra
+library(ggplot2)
+library(gridExtra)
+library(htmlwidgets)
+library(knitr)
+library(devtools)
+library(plotly) 
+library(kableExtra)
+STAurlfile = "http://epscor.uvm.edu/StAlbans/STAData-LatestPFLData.csv"
+STAmeturl = "http://epscor.uvm.edu/StAlbans/STAData-LatestMetData.csv"
+MBurlfile = "http://epscor.uvm.edu/StAlbans/MBData-LatestPFLData.csv"
+MBmeturl = "http://epscor.uvm.edu/StAlbans/MBData-LatestMetData.csv"
+
+
+## Ashton... Start editing names here...
+carmidata <- read.csv(url(STAurlfile), skip=1)
+carmimet <- read.csv(url(STAmeturl), stringsAsFactors = F)
+#mettable <- carmimet[,c(3,4,9)]
+mettable <- carmimet
+#Rename columns to be used
+names(carmidata)[1] <- "Date"
+names(carmidata)[6] <- "Temp"
+names(carmidata)[16] <- "DO"
+names(carmidata)[18] <- "Chl"
+names(carmidata)[20] <- "PC"
+names(carmidata)[21] <- "depth"
+#Remove rows without data.
+# carmidata <- subset(carmidata, Date !="TIMESTAMP" & Date !="TS")
+# carmidata <- subset(carmidata, CR1000 !="Smp")
+#Format date column
+carmidata$Date <- strptime(carmidata$Date, "%Y-%m-%d %H:%M:%S")
+carmidata$Date<- as.POSIXct(carmidata$Date)
+#Format columns as numeric
+carmidata$DO <- as.numeric(carmidata$DO)
+carmidata$depth <- as.numeric(carmidata$depth)
+carmidata$Chl <- as.numeric(carmidata$Chl)
+carmidata$PC <- as.numeric(carmidata$PC)
+carmidata$Temp <- as.numeric(carmidata$Temp)
+#Create new dataset with Date, Temp, DO, depth columns.
+CarmiDO <- carmidata[,c(1,6,16,21)]
+#Subset surface and bottom DO measurements
+Surface <- subset(CarmiDO,depth<0.8)
+Bottom <- subset(CarmiDO,depth>3.8)
+#Pull data for recent conditions table, rename, format
+mytable <- tail(Surface,1)
+mytable <- mytable[,c(1,2)]
+mytable$Date <-format(mytable$Date,format='%B %d, %Y %H:00')
+names(mytable)[1] <- "Last Platform Collection"
+names(mytable)[2] <- "Surface Temperature (*C)"
+mytable$BottomTemp <- tail(Bottom$Temp,1)
+names(mytable)[3] <- "Bottom Temperature (*C)"
+mytable$SurfaceDO <- tail(Surface$DO,1)
+names(mytable)[4] <- "Surface Dissolved Oxygen (mg/L)"
+mytable$BottomDO <- tail(Bottom$DO,1)
+names(mytable)[5] <- "Bottom Dissolved Oxygen (mg/L)"
+metDate <- tail(mettable$Date, 1)
+metDate <- substr(metDate, 1, nchar(metDate)-1)
+metDate <- strptime(metDate, "%Y-%m-%d %H:%M:%S", tz="GMT")
+metDate <- as.POSIXct(metDate)
+mytable$metCollection = format(metDate, format='%B %d, %Y %H:%M', tz="")
+names(mytable)[6] <- "Last Met Collection"
+mytable$Air <- tail(mettable$Temperature,1)
+mytable$Air <- round(mytable$Air,digits=2)
+names(mytable)[7] <- "Air Temperature (*C)"
+mytable$WS <- tail(mettable$Wind.Speed,1)
+mytable$WS <- round(mytable$WS,digits=2)
+names(mytable)[8] <- "Wind Speed (m/s)"
+mytable$`Wind Speed (m/s)`<- as.numeric(mytable$`Wind Speed (m/s)`)
+mytable$mph <- tail(mytable$`Wind Speed (m/s)`,1)
+mytable$mph <- mytable$mph*2.237
+mytable$mph <- round(mytable$mph,digits=2)
+names(mytable)[9] <- "Wind Speed (mph)"
+mytable$Wdir <- tail(mettable$Wind.Direction,1)
+names(mytable)[10] <- "Wind Direction"
+mytable$`Wind Direction` <- as.numeric(mytable$`Wind Direction`)
+#Wind Degree to Cardinal Function
+d2c.2 <- function(x) {
+  upper <- seq(from = 11.25, by = 22.5, length.out = 17)
+  card1 <- c('N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW', 'N')
+  ifelse(x>360 | x<0,NA,card1[findInterval(x,upper,rightmost.closed = T)+1])
+}
+mytable$`Wind Direction` <- d2c.2(mytable$`Wind Direction`)
+#Format table for printing
+rownames(mytable) <- c(" ")
+mytable <- t(mytable)
+kable(mytable, align='r') %>% kable_styling(bootstrap_options = c("striped", "hover"),
+                full_width = F,
+                font_size = 12,
+                position = "left")
+```
+<h4>The collection of these data and the larger Lake Carmi research project are primarily supported by Vermont Department of Environmental Conservation under the Clean Water Initiative, and conducted in collaboration with the Vermont DEC's Lakes and Ponds Program.</h4>
+<br>
+   
+<h2>Lake Condition Plots</h2>
+Note: click the legend to remove depths from a plot for a cleaner look.
+
+```{r, echo=FALSE, message=FALSE}
+#Plot Setup
+#Subset surface and bottom DO measurements
+DOPlot <- subset(CarmiDO,depth>8.3 | depth<0.8)
+DOPlot$Depth <- ifelse(DOPlot$depth<5, "UVM Buoy Site Surface (0.5 meter depth)", "UVM Buoy Site Bottom (8.5 meter depth)")
+#Create new dataset with Date, BGA PC, depth columns.
+CarmiPC<-carmidata[,c(1,18,20,21)]
+#Subset surface BGA PC measurements
+PCPlot <- subset(CarmiPC,depth<0.8)
+#GGPlot Setup (DO) Original Surface and Bottom Values Hidden
+#DO <- ggplot(DOPlot, aes(x=Date,y=DO)) + geom_line(aes(col=Depth)) + labs(title="Lake Carmi Dissolved Oxygen", y="DO (mg/L)", x="Date") + scale_y_continuous(breaks=seq(0,16,2), expand = c(0, 0), limits = c(0, 16)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_manual(labels = c("UVM Buoy Site Surface (0.5 meter depth)", "UVM Buoy Site Bottom (8.5 meter depth)"), values=(c("UVM Buoy Site Surface (0.5 meter depth)"="blue", "UVM Buoy Site Bottom (8.5 meter depth)"="red")))
+#ggplotly(DO) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
+#Full DO Profile Setup
+DOPlot2 <-CarmiDO
+DOPlot2$Depth <- ifelse(DOPlot2$depth < 0.8, "0.5m",
+                        ifelse(DOPlot2$depth>0.8 & DOPlot2$depth<1.5, "1.0m",
+                        ifelse(DOPlot2$depth>1.5 & DOPlot2$depth<1.8, "1.5m",
+                        ifelse(DOPlot2$depth>1.8 & DOPlot2$depth<2.4, "2.0m", 
+                        ifelse(DOPlot2$depth>2.4 & DOPlot2$depth<3.0, "2.5m",
+                        ifelse(DOPlot2$depth>3.0 & DOPlot2$depth<3.4, "3.0m",
+                        ifelse(DOPlot2$depth>3.4 & DOPlot2$depth<3.9, "3.5m",
+                        ifelse(DOPlot2$depth>3.9 & DOPlot2$depth<4.4, "4.0m",
+                        ifelse(DOPlot2$depth>4.4 & DOPlot2$depth<4.8, "4.5m",
+                        ifelse(DOPlot2$depth>4.8 & DOPlot2$depth<5.4, "5.0m",
+                        ifelse(DOPlot2$depth>5.4 & DOPlot2$depth<5.9, "5.5m",
+                        ifelse(DOPlot2$depth>5.9 & DOPlot2$depth<6.4, "6.0m",
+                        ifelse(DOPlot2$depth>6.4 & DOPlot2$depth<6.9, "6.5m",
+                        ifelse(DOPlot2$depth>6.9 & DOPlot2$depth<7.4, "7.0m",
+                        ifelse(DOPlot2$depth>7.4 & DOPlot2$depth<7.9, "7.5m",
+                        ifelse(DOPlot2$depth>7.9 & DOPlot2$depth<8.4, "8.0m",
+                               "8.5m"))))))))))))))))
+#Plot of 0.5, 5.0, 8.0, 8.5 meters
+DOPlot3 <- subset(DOPlot2,Depth=="0.5m" |Depth=="5.0m" |Depth=="7.5m" | Depth=="8.0m" | Depth=="8.5m")
+DO2 <- ggplot(DOPlot3,aes(x=Date,y=DO),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Lake Carmi Dissolved Oxygen", y="Dissolved Oxygen (mg/L)", x="Date", Depth="Legend") + scale_y_continuous(breaks=seq(0,16,2), expand = c(0, 0), limits = c(0, 16)) + scale_color_brewer(palette="Set1")
+ggplotly(DO2) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
+#GGPlot Setup (Temp) 
+CTemp <- ggplot(DOPlot, aes(x=Date,y=Temp)) + geom_line(aes(col=Depth)) + labs(title="Lake Carmi Water Temperature", y="Temperature (*C)", x="Date") + scale_y_continuous(breaks=seq(0,40,2)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_brewer(palette="Set1") 
+ggplotly(CTemp) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
+
+grid.arrange(DO2, CTemp, ncol = 2)
+```
+<br>
+<h2>Biological Activity Plots</h2>
+<p style="background-color:powderblue;">Note: Phycocyanin is a pigment found in cyanobacteria (blue-green algae). Increases in relative fluorescence (RFU) suggest increasing detection of cyanobacteria, but this is not a direct quantitative measurement.There are many caveats associated with using phycocyanin sensors to study cyanobacteria dynamics, but there is general consensus that they are useful for detecting relative changes over time in cyanobacteria biomass at a specific location. Given the propensity of cyanobacteria to concentrate in particular locations in the lake, often due to wind forcing, these point specific sensor data are not necessarily indicative of changes/bloom dynamics across the entire lake at any given time point.</p>
+```{r, echo=FALSE, message=FALSE}
+#GGPlot Setup (PC)
+PC <- ggplot(PCPlot, aes(x=Date,y=PC)) + geom_line(colour="steelblue3") + labs(title="Lake Carmi Blue Green Algae Phycocyanin (~0.5 meters)", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,11,2), limits = c(0, 11))
+ggplotly(PC)
+```
+
+```{r, echo=FALSE, message=FALSE}
+#GGPlot Setup (Chl)
+Chl <- ggplot(PCPlot, aes(x=Date,y=Chl)) + geom_line(colour="steelblue3") + labs(title="Lake Carmi Chlorophyll (~0.5 meters)", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,4.0,1), limits = c(0, 4.0))
+ggplotly(Chl)
+```
+
+<p style="text-align:center">Please contact us at ashton.kirol@uvm.edu.com and andrew.schroth@uvm.edu with any questions or comments.</p>
+
+<table style="width: 80%; border: 0px; margin-left:auto; margin-right:auto"><tr><td><img src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/images/NSF.png" style="width: 300px"></td><td style="vertical-align: middle">These data and infrastructure are also sourced in research support provided to Andrew Schroth by the National Science Foundation under under VT EPSCoR Grant No. NSF OIA-1556770 and EAR-1561014. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation.</td></tr></table>
+<br>
+
+<script>
+document.getElementById('cover-spin').style.display = 'none';
+</script>
