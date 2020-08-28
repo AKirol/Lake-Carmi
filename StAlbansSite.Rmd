@@ -259,23 +259,26 @@ STA_DOPlot2$Depth <- ifelse(STA_DOPlot2$depth < 0.8, "0.5m",
 STA_DOPlot3 <- subset(STA_DOPlot2,Depth=="0.5m" |Depth=="4.0m")
 STA_DO2 <- ggplot(STA_DOPlot3,aes(x=Date,y=DO),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Saint Albans Bay Dissolved Oxygen", y="Dissolved Oxygen (mg/L)", x="Date") + scale_y_continuous(breaks=seq(0,16,2), expand = c(0, 0), limits = c(0, 16)) + scale_color_brewer(palette="Set1")
 
-ggplotly(STA_DO2) %>%add_annotations( text="Depth", xref="paper", yref="paper",
-                  x=0.05, xanchor="left",
-                 y=0.2, yanchor="bottom",   
-                 legendtitle=TRUE, showarrow=FALSE ) %>%
-  layout( legend=list(y=0.05, yanchor="bottom",x=0.05, xanchor="left" ) )
-
 #GGPlot Setup (Temp) 
 STA_Temp <- ggplot(STA_DOPlot3, aes(x=Date,y=Temp),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Saint Albans Bay Water Temperature", y="Temperature (*C)", x="Date") + scale_y_continuous(breaks=seq(15,35,5),limits = c(15,35)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_brewer(palette="Set1") 
-ggplotly(STA_Temp)%>%add_annotations( text="Depth", xref="paper", yref="paper",
+```
+<div style="overflow: auto"><div style="float: left; overflow: hidden">
+```{r, echo=FALSE, message=FALSE}
+ggplotly(STA_DO2, width=400) %>%add_annotations( text="Depth", xref="paper", yref="paper",
                   x=0.05, xanchor="left",
                  y=0.2, yanchor="bottom",   
                  legendtitle=TRUE, showarrow=FALSE ) %>%
   layout( legend=list(y=0.05, yanchor="bottom",x=0.05, xanchor="left" ) )
-
-
-grid.arrange(STA_DO2, STA_Temp, ncol = 2)
 ```
+</div><div style="float: left; overflow: hidden">
+```{r, echo=FALSE, message=FALSE}
+ggplotly(STA_Temp, width=400) %>%add_annotations( text="Depth", xref="paper", yref="paper",
+                  x=0.05, xanchor="left",
+                 y=0.2, yanchor="bottom",   
+                 legendtitle=TRUE, showarrow=FALSE ) %>%
+  layout( legend=list(y=0.05, yanchor="bottom",x=0.05, xanchor="left" ) )
+```
+</div></div>
 ```{r, echo=FALSE, message=FALSE}
 #Plot Setup
 #Subset MB_Surface and MB_Bottom DO measurements
