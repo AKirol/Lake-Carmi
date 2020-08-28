@@ -158,9 +158,9 @@ MBmettable <- MBmet
 #Rename columns to be used
 names(MBdata)[1] <- "Date" #set
 names(MBdata)[12] <- "Temp" #set
-names(MBdata)[16] <- "DO" #set
-names(MBdata)[18] <- "Chl" #Need Column
-names(MBdata)[20] <- "PC" #Need Column
+names(MBdata)[23] <- "DO" #set
+names(MBdata)[21] <- "Chl" #Need Column
+names(MBdata)[19] <- "PC" #Need Column
 names(MBdata)[15] <- "depth" #set
 #Remove rows without data.
 # MBdata <- subset(MBdata, Date !="TIMESTAMP" & Date !="TS")
@@ -175,7 +175,7 @@ MBdata$Chl <- as.numeric(MBdata$Chl)
 MBdata$PC <- as.numeric(MBdata$PC)
 MBdata$Temp <- as.numeric(MBdata$Temp)
 #Create new dataset with Date, Temp, DO, depth columns.
-MB_DO <- MBdata[,c(1,12,16,15)]
+MB_DO <- MBdata[,c(1,12,23,15)]
 #Subset MB_Surface and MB_Bottom DO measurements
 MB_Surface <- subset(MB_DO,depth<0.8)
 MB_Bottom <- subset(MB_DO,depth>1.8)
@@ -257,7 +257,7 @@ STA_DOPlot2$Depth <- ifelse(STA_DOPlot2$depth < 0.8, "0.5m",
                                "4.0m")))))))
 #Plot of 0.5, 4.0 meters
 STA_DOPlot3 <- subset(STA_DOPlot2,Depth=="0.5m" |Depth=="4.0m")
-STA_DO2 <- ggplot(STA_DOPlot3,aes(x=Date,y=DO),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Saint Albans Bay Dissolved Oxygen", y="Dissolved Oxygen (mg/L)", x="Date") + scale_y_continuous(breaks=seq(4,16,2), expand = c(0, 0), limits = c(4, 16)) + scale_color_brewer(palette="Set1")
+STA_DO2 <- ggplot(STA_DOPlot3,aes(x=Date,y=DO),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Saint Albans Bay Dissolved Oxygen", y="Dissolved Oxygen (mg/L)", x="Date") + scale_y_continuous(breaks=seq(0,16,2), expand = c(0, 0), limits = c(0, 16)) + scale_color_brewer(palette="Set1")
 
 ggplotly(STA_DO2) %>%add_annotations( text="Depth", xref="paper", yref="paper",
                   x=0.05, xanchor="left",
@@ -266,7 +266,7 @@ ggplotly(STA_DO2) %>%add_annotations( text="Depth", xref="paper", yref="paper",
   layout( legend=list(y=0.05, yanchor="bottom",x=0.05, xanchor="left" ) )
 
 #GGPlot Setup (Temp) 
-STA_Temp <- ggplot(STA_DOPlot3, aes(x=Date,y=Temp),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Saint Albans Bay Water Temperature", y="Temperature (*C)", x="Date") + scale_y_continuous(breaks=seq(0,40,2)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_brewer(palette="Set1") 
+STA_Temp <- ggplot(STA_DOPlot3, aes(x=Date,y=Temp),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Saint Albans Bay Water Temperature", y="Temperature (*C)", x="Date") + scale_y_continuous(breaks=seq(15,35,5),limits = c(15,35)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_brewer(palette="Set1") 
 ggplotly(STA_Temp)%>%add_annotations( text="Depth", xref="paper", yref="paper",
                   x=0.05, xanchor="left",
                  y=0.2, yanchor="bottom",   
@@ -281,12 +281,9 @@ grid.arrange(STA_DO2, STA_Temp, ncol = 2)
 #Subset MB_Surface and MB_Bottom DO measurements
 MB_DOPlot <- subset(MB_DO,depth>1.8 | depth<0.8)
 MB_DOPlot$Depth <- ifelse(MB_DOPlot$depth<0.8, "0.5m", "2.0m")
+
 #Create new dataset with Date, BGA PC, depth columns.
-STA_PC<-STAdata[,c(1,18,20,21)]
-#Subset STA_Surface BGA PC measurements
-STA_PCPlot <- subset(STA_PC,depth<0.8)
-#Create new dataset with Date, BGA PC, depth columns.
-MB_PC<-MBdata[,c(1,18,20,15)]
+MB_PC<-MBdata[,c(1,21,19,15)]
 #Subset STA_Surface BGA PC measurements
 MB_PCPlot <- subset(MB_PC,depth<0.8)
 
@@ -300,21 +297,21 @@ MB_DOPlot2$Depth <- ifelse(MB_DOPlot2$depth < 0.8, "0.5m",
                         ifelse(MB_DOPlot2$depth>1.3 & MB_DOPlot2$depth<1.8, "1.5m", "2.0m")))
 #Plot of 0.5, 2.0 meters
 MB_DOPlot3 <- subset(MB_DOPlot2,Depth=="0.5m" |Depth=="2.0m")
-MB_DO2 <- ggplot(MB_DOPlot3,aes(x=Date,y=DO),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Missisquoi Bay Dissolved Oxygen", y="Dissolved Oxygen (mg/L)", x="Date", Depth="Legend") + scale_y_continuous(breaks=seq(4,12,2), expand = c(0, 0), limits = c(4, 12)) + scale_color_brewer(palette="Set1")
+MB_DO2 <- ggplot(MB_DOPlot3,aes(x=Date,y=DO),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Missisquoi Bay Dissolved Oxygen", y="Dissolved Oxygen (mg/L)", x="Date", Depth="Legend") + scale_y_continuous(breaks=seq(0,16,2), expand = c(0, 0), limits = c(0, 16)) + scale_color_brewer(palette="Set1")
 ggplotly(MB_DO2) %>%add_annotations( text="Depth", xref="paper", yref="paper",
                   x=0.05, xanchor="left",
                  y=0.2, yanchor="bottom",   
                  legendtitle=TRUE, showarrow=FALSE ) %>%
   layout( legend=list(y=0.05, yanchor="bottom",x=0.05, xanchor="left" ) )
 #GGPlot Setup (Temp) 
-STA_Temp <- ggplot(MB_DOPlot3, aes(x=Date,y=Temp),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Missisquoi Bay Water Temperature", y="Temperature (*C)", x="Date") + scale_y_continuous(breaks=seq(0,40,2)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_brewer(palette="Set1") 
-ggplotly(STA_Temp)%>%add_annotations( text="Depth", xref="paper", yref="paper",
+MB_Temp <- ggplot(MB_DOPlot3, aes(x=Date,y=Temp),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Missisquoi Bay Water Temperature", y="Temperature (*C)", x="Date") + scale_y_continuous(breaks=seq(15,35,5),limits = c(15,35)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_brewer(palette="Set1") 
+ggplotly(MB_Temp)%>%add_annotations( text="Depth", xref="paper", yref="paper",
                   x=0.05, xanchor="left",
                  y=0.2, yanchor="bottom",   
                  legendtitle=TRUE, showarrow=FALSE ) %>%
   layout( legend=list(y=0.05, yanchor="bottom",x=0.05, xanchor="left" ) )
 
-grid.arrange(MB_DO2, STA_Temp, ncol = 2)
+grid.arrange(MB_DO2, MB_Temp, ncol = 2)
 
 ```
 <br>
@@ -322,25 +319,25 @@ grid.arrange(MB_DO2, STA_Temp, ncol = 2)
 <p style="background-color:powderblue;">Note: Phycocyanin is a pigment found in cyanobacteria (blue-green algae). Increases in relative fluorescence (RFU) suggest increasing detection of cyanobacteria, but this is not a direct quantitative measurement.There are many caveats associated with using phycocyanin sensors to study cyanobacteria dynamics, but there is general consensus that they are useful for detecting relative changes over time in cyanobacteria biomass at a specific location. Given the propensity of cyanobacteria to concentrate in particular locations in the lake, often due to wind forcing, these point specific sensor data are not necessarily indicative of changes/bloom dynamics across the entire lake at any given time point.</p>
 ```{r, echo=FALSE, message=FALSE}
 #GGPlot Setup (Saint Albans PC)
-STA_PC <- ggplot(STA_PCPlot, aes(x=Date,y=PC)) + geom_line(colour="steelblue3") + labs(title="Saint Albans Bay Blue Green Algae Phycocyanin (~0.5 meters)", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,11,2), limits = c(0, 11))
+STA_PC <- ggplot(STA_PCPlot, aes(x=Date,y=PC)) + geom_line(colour="steelblue3") + labs(title="Saint Albans Bay Blue Green Algae Phycocyanin (~0.5 meters)", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(-2,14,2), limits = c(-2, 14))
 ggplotly(STA_PC)
 ```
 
 ```{r, echo=FALSE, message=FALSE}
 #GGPlot Setup (Saint Albans Chl)
-STA_Chl <- ggplot(STA_PCPlot, aes(x=Date,y=Chl)) + geom_line(colour="steelblue3") + labs(title="Saint Albans Bay Chlorophyll (~0.5 meters)", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,4.0,1), limits = c(0, 4.0))
+STA_Chl <- ggplot(STA_PCPlot, aes(x=Date,y=Chl)) + geom_line(colour="steelblue3") + labs(title="Saint Albans Bay Chlorophyll (~0.5 meters)", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(-2,10,2), limits = c(-2, 10))
 ggplotly(STA_Chl)
 ```
 
 ```{r, echo=FALSE, message=FALSE}
 #GGPlot Setup (Missisquoi PC)
-MB_PC <- ggplot(MB_PCPlot, aes(x=Date,y=PC)) + geom_line(colour="steelblue3") + labs(title="Missisquoi Bay Blue Green Algae Phycocyanin (~0.5 meters)", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,11,2), limits = c(0, 11))
+MB_PC <- ggplot(MB_PCPlot, aes(x=Date,y=PC)) + geom_line(colour="steelblue3") + labs(title="Missisquoi Bay Blue Green Algae Phycocyanin (~0.5 meters)", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(-2,14,2), limits = c(-2, 14))
 ggplotly(MB_PC)
 ```
 
 ```{r, echo=FALSE, message=FALSE}
 #GGPlot Setup (Missisquoi Chl)
-MB_Chl <- ggplot(MB_PCPlot, aes(x=Date,y=Chl)) + geom_line(colour="steelblue3") + labs(title="Missisquoi Bay Chlorophyll (~0.5 meters)", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,4.0,1), limits = c(0, 4.0))
+MB_Chl <- ggplot(MB_PCPlot, aes(x=Date,y=Chl)) + geom_line(colour="steelblue3") + labs(title="Missisquoi Bay Chlorophyll (~0.5 meters)", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(-2,10,2), limits = c(-2, 10))
 ggplotly(MB_Chl)
 ```
 
