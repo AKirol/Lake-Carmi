@@ -12,7 +12,7 @@ output:
 #cover-spin {
     position:fixed;
     width:100%;
-    left:0;right:0;top:0;bottom:0;
+    left:0;right:0;top:0;STA_Bottom:0;
     background-color: rgba(255,255,255,0.7);
     z-index:9999;
     display:none;
@@ -50,11 +50,15 @@ output:
 document.getElementById('cover-spin').style.display = 'block';
 </script>
 
-<h2>Recent Lake Conditions</h2>
-<span style="font-size: 10pt;">Updated at 8:30, 12:30, and 16:30 each day</span>
-<img align="right" height="320" src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/images/platform.png">
+<img src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/Missisquoi.png" style="width: 100%;">
+<p style="text-align:right;">Image: Missisquoi Bay, July 2020</p>
+<br>
+
 
 ```{r,echo=FALSE, message=FALSE,warning=FALSE}
+#<span style="font-size: 10pt;">Updated at 8:30, 12:30, and 16:30 each day</span>
+#<img align="right" height="320" src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/images/platform.png">
+
 #Code to pull csv data, create current condition table:
 #Install + load ggplot2, htmlwidgets, knitr, devtools, plotly, kableExtra
 library(ggplot2)
@@ -71,141 +75,273 @@ MBmeturl = "http://epscor.uvm.edu/StAlbans/MBData-LatestMetData.csv"
 
 
 ## Ashton... Start editing names here...
-carmidata <- read.csv(url(STAurlfile), skip=1)
-carmimet <- read.csv(url(STAmeturl), stringsAsFactors = F)
-#mettable <- carmimet[,c(3,4,9)]
-mettable <- carmimet
+STAdata <- read.csv(url(STAurlfile), skip=1)
+STAmet <- read.csv(url(STAmeturl), stringsAsFactors = F)
+#STAmettable <- STAmet[,c(3,4,9)]
+STAmettable <- STAmet
 #Rename columns to be used
-names(carmidata)[1] <- "Date"
-names(carmidata)[6] <- "Temp"
-names(carmidata)[16] <- "DO"
-names(carmidata)[18] <- "Chl"
-names(carmidata)[20] <- "PC"
-names(carmidata)[21] <- "depth"
+names(STAdata)[1] <- "Date" #set
+names(STAdata)[6] <- "Temp" #set
+names(STAdata)[16] <- "DO" 
+names(STAdata)[18] <- "Chl"
+names(STAdata)[20] <- "PC"
+names(STAdata)[21] <- "depth" #set
 #Remove rows without data.
-# carmidata <- subset(carmidata, Date !="TIMESTAMP" & Date !="TS")
-# carmidata <- subset(carmidata, CR1000 !="Smp")
+# STAdata <- subset(STAdata, Date !="TIMESTAMP" & Date !="TS")
+# STAdata <- subset(STAdata, CR1000 !="Smp")
 #Format date column
-carmidata$Date <- strptime(carmidata$Date, "%Y-%m-%d %H:%M:%S")
-carmidata$Date<- as.POSIXct(carmidata$Date)
+STAdata$Date <- strptime(STAdata$Date, "%Y-%m-%d %H:%M:%S")
+STAdata$Date<- as.POSIXct(STAdata$Date)
 #Format columns as numeric
-carmidata$DO <- as.numeric(carmidata$DO)
-carmidata$depth <- as.numeric(carmidata$depth)
-carmidata$Chl <- as.numeric(carmidata$Chl)
-carmidata$PC <- as.numeric(carmidata$PC)
-carmidata$Temp <- as.numeric(carmidata$Temp)
+STAdata$DO <- as.numeric(STAdata$DO)
+STAdata$depth <- as.numeric(STAdata$depth)
+STAdata$Chl <- as.numeric(STAdata$Chl)
+STAdata$PC <- as.numeric(STAdata$PC)
+STAdata$Temp <- as.numeric(STAdata$Temp)
 #Create new dataset with Date, Temp, DO, depth columns.
-CarmiDO <- carmidata[,c(1,6,16,21)]
-#Subset surface and bottom DO measurements
-Surface <- subset(CarmiDO,depth<0.8)
-Bottom <- subset(CarmiDO,depth>3.8)
+STA_DO <- STAdata[,c(1,6,16,21)]
+#Subset STA_Surface and STA_Bottom DO measurements
+STA_Surface <- subset(STA_DO,depth<0.8)
+STA_Bottom <- subset(STA_DO,depth>3.8)
 #Pull data for recent conditions table, rename, format
-mytable <- tail(Surface,1)
-mytable <- mytable[,c(1,2)]
-mytable$Date <-format(mytable$Date,format='%B %d, %Y %H:00')
-names(mytable)[1] <- "Last Platform Collection"
-names(mytable)[2] <- "Surface Temperature (*C)"
-mytable$BottomTemp <- tail(Bottom$Temp,1)
-names(mytable)[3] <- "Bottom Temperature (*C)"
-mytable$SurfaceDO <- tail(Surface$DO,1)
-names(mytable)[4] <- "Surface Dissolved Oxygen (mg/L)"
-mytable$BottomDO <- tail(Bottom$DO,1)
-names(mytable)[5] <- "Bottom Dissolved Oxygen (mg/L)"
-metDate <- tail(mettable$Date, 1)
-metDate <- substr(metDate, 1, nchar(metDate)-1)
-metDate <- strptime(metDate, "%Y-%m-%d %H:%M:%S", tz="GMT")
-metDate <- as.POSIXct(metDate)
-mytable$metCollection = format(metDate, format='%B %d, %Y %H:%M', tz="")
-names(mytable)[6] <- "Last Met Collection"
-mytable$Air <- tail(mettable$Temperature,1)
-mytable$Air <- round(mytable$Air,digits=2)
-names(mytable)[7] <- "Air Temperature (*C)"
-mytable$WS <- tail(mettable$Wind.Speed,1)
-mytable$WS <- round(mytable$WS,digits=2)
-names(mytable)[8] <- "Wind Speed (m/s)"
-mytable$`Wind Speed (m/s)`<- as.numeric(mytable$`Wind Speed (m/s)`)
-mytable$mph <- tail(mytable$`Wind Speed (m/s)`,1)
-mytable$mph <- mytable$mph*2.237
-mytable$mph <- round(mytable$mph,digits=2)
-names(mytable)[9] <- "Wind Speed (mph)"
-mytable$Wdir <- tail(mettable$Wind.Direction,1)
-names(mytable)[10] <- "Wind Direction"
-mytable$`Wind Direction` <- as.numeric(mytable$`Wind Direction`)
+STA_mytable <- tail(STA_Surface,1)
+STA_mytable <- STA_mytable[,c(1,2)]
+STA_mytable$Date <-format(STA_mytable$Date,format='%B %d, %Y %H:00')
+names(STA_mytable)[1] <- "Last Platform Collection"
+names(STA_mytable)[2] <- "STA_Surface Temperature (*C)"
+STA_mytable$STA_BottomTemp <- tail(STA_Bottom$Temp,1)
+names(STA_mytable)[3] <- "STA_Bottom Temperature (*C)"
+STA_mytable$STA_SurfaceDO <- tail(STA_Surface$DO,1)
+names(STA_mytable)[4] <- "STA_Surface Dissolved Oxygen (mg/L)"
+STA_mytable$STA_BottomDO <- tail(STA_Bottom$DO,1)
+names(STA_mytable)[5] <- "STA_Bottom Dissolved Oxygen (mg/L)"
+STA_metDate <- tail(STAmettable$Date, 1)
+STA_metDate <- substr(STA_metDate, 1, nchar(STA_metDate)-1)
+STA_metDate <- strptime(STA_metDate, "%Y-%m-%d %H:%M:%S", tz="GMT")
+STA_metDate <- as.POSIXct(STA_metDate)
+STA_mytable$metCollection = format(STA_metDate, format='%B %d, %Y %H:%M', tz="")
+names(STA_mytable)[6] <- "Last Met Collection"
+STA_mytable$Air <- tail(STAmettable$Temperature,1)
+STA_mytable$Air <- round(STA_mytable$Air,digits=2)
+names(STA_mytable)[7] <- "Air Temperature (*C)"
+STA_mytable$WS <- tail(STAmettable$Wind.Speed,1)
+STA_mytable$WS <- round(STA_mytable$WS,digits=2)
+names(STA_mytable)[8] <- "Wind Speed (m/s)"
+STA_mytable$`Wind Speed (m/s)`<- as.numeric(STA_mytable$`Wind Speed (m/s)`)
+STA_mytable$mph <- tail(STA_mytable$`Wind Speed (m/s)`,1)
+STA_mytable$mph <- STA_mytable$mph*2.237
+STA_mytable$mph <- round(STA_mytable$mph,digits=2)
+names(STA_mytable)[9] <- "Wind Speed (mph)"
+STA_mytable$Wdir <- tail(STAmettable$Wind.Direction,1)
+names(STA_mytable)[10] <- "Wind Direction"
+STA_mytable$`Wind Direction` <- as.numeric(STA_mytable$`Wind Direction`)
 #Wind Degree to Cardinal Function
 d2c.2 <- function(x) {
   upper <- seq(from = 11.25, by = 22.5, length.out = 17)
   card1 <- c('N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW', 'N')
   ifelse(x>360 | x<0,NA,card1[findInterval(x,upper,rightmost.closed = T)+1])
 }
-mytable$`Wind Direction` <- d2c.2(mytable$`Wind Direction`)
+STA_mytable$`Wind Direction` <- d2c.2(STA_mytable$`Wind Direction`)
 #Format table for printing
-rownames(mytable) <- c(" ")
-mytable <- t(mytable)
-kable(mytable, align='r') %>% kable_styling(bootstrap_options = c("striped", "hover"),
+rownames(STA_mytable) <- c(" ")
+STA_mytable <- t(STA_mytable)
+kable(STA_mytable, align='r',caption="Saint Albans Bay") %>% kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = F,
                 font_size = 12,
-                position = "left")
+                position = "float_left")
+
+#Missisquoi Table
+MBdata <- read.csv(url(MBurlfile), skip=1)
+MBmet <- read.csv(url(MBmeturl), stringsAsFactors = F)
+#MBmettable <- MBmet[,c(3,4,9)]
+MBmettable <- MBmet
+#Rename columns to be used
+names(MBdata)[1] <- "Date" #set
+names(MBdata)[12] <- "Temp" #set
+names(MBdata)[16] <- "DO" #set
+names(MBdata)[18] <- "Chl" #Need Column
+names(MBdata)[20] <- "PC" #Need Column
+names(MBdata)[15] <- "depth" #set
+#Remove rows without data.
+# MBdata <- subset(MBdata, Date !="TIMESTAMP" & Date !="TS")
+# MBdata <- subset(MBdata, CR1000 !="Smp")
+#Format date column
+MBdata$Date <- strptime(MBdata$Date, "%Y-%m-%d %H:%M:%S")
+MBdata$Date<- as.POSIXct(MBdata$Date)
+#Format columns as numeric
+MBdata$DO <- as.numeric(MBdata$DO)
+MBdata$depth <- as.numeric(MBdata$depth)
+MBdata$Chl <- as.numeric(MBdata$Chl)
+MBdata$PC <- as.numeric(MBdata$PC)
+MBdata$Temp <- as.numeric(MBdata$Temp)
+#Create new dataset with Date, Temp, DO, depth columns.
+MB_DO <- MBdata[,c(1,12,16,15)]
+#Subset MB_Surface and MB_Bottom DO measurements
+MB_Surface <- subset(MB_DO,depth<0.8)
+MB_Bottom <- subset(MB_DO,depth>1.8)
+#Pull data for recent conditions table, rename, format
+MB_mytable <- tail(MB_Surface,1)
+MB_mytable <- MB_mytable[,c(1,2)]
+MB_mytable$Date <-format(MB_mytable$Date,format='%B %d, %Y %H:00')
+names(MB_mytable)[1] <- "Last Platform Collection"
+names(MB_mytable)[2] <- "MB_Surface Temperature (*C)"
+MB_mytable$MB_BottomTemp <- tail(MB_Bottom$Temp,1)
+names(MB_mytable)[3] <- "MB_Bottom Temperature (*C)"
+MB_mytable$MB_SurfaceDO <- tail(MB_Surface$DO,1)
+names(MB_mytable)[4] <- "MB_Surface Dissolved Oxygen (mg/L)"
+MB_mytable$MB_BottomDO <- tail(MB_Bottom$DO,1)
+names(MB_mytable)[5] <- "MB_Bottom Dissolved Oxygen (mg/L)"
+MB_metDate <- tail(MBmettable$Date, 1)
+MB_metDate <- substr(MB_metDate, 1, nchar(MB_metDate)-1)
+MB_metDate <- strptime(MB_metDate, "%Y-%m-%d %H:%M:%S", tz="GMT")
+MB_metDate <- as.POSIXct(MB_metDate)
+MB_mytable$metCollection = format(MB_metDate, format='%B %d, %Y %H:%M', tz="")
+names(MB_mytable)[6] <- "Last Met Collection"
+MB_mytable$Air <- tail(MBmettable$Temperature,1)
+MB_mytable$Air <- round(MB_mytable$Air,digits=2)
+names(MB_mytable)[7] <- "Air Temperature (*C)"
+MB_mytable$WS <- tail(MBmettable$Wind.Speed,1)
+MB_mytable$WS <- round(MB_mytable$WS,digits=2)
+names(MB_mytable)[8] <- "Wind Speed (m/s)"
+MB_mytable$`Wind Speed (m/s)`<- as.numeric(MB_mytable$`Wind Speed (m/s)`)
+MB_mytable$mph <- tail(MB_mytable$`Wind Speed (m/s)`,1)
+MB_mytable$mph <- MB_mytable$mph*2.237
+MB_mytable$mph <- round(MB_mytable$mph,digits=2)
+names(MB_mytable)[9] <- "Wind Speed (mph)"
+MB_mytable$Wdir <- tail(MBmettable$Wind.Direction,1)
+names(MB_mytable)[10] <- "Wind Direction"
+MB_mytable$`Wind Direction` <- as.numeric(MB_mytable$`Wind Direction`)
+#Wind Degree to Cardinal Function
+d2c.2 <- function(x) {
+  upper <- seq(from = 11.25, by = 22.5, length.out = 17)
+  card1 <- c('N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW', 'N')
+  ifelse(x>360 | x<0,NA,card1[findInterval(x,upper,rightmost.closed = T)+1])
+}
+MB_mytable$`Wind Direction` <- d2c.2(MB_mytable$`Wind Direction`)
+#Format table for printing
+rownames(MB_mytable) <- c(" ")
+MB_mytable <- t(MB_mytable)
+kable(MB_mytable, align='r',caption="Missisquoi Bay") %>% kable_styling(bootstrap_options = c("striped", "hover"),
+                full_width = F,
+                font_size = 12,
+                position = "right")
+
 ```
-<h4>The collection of these data and the larger Lake Carmi research project are primarily supported by Vermont Department of Environmental Conservation under the Clean Water Initiative, and conducted in collaboration with the Vermont DEC's Lakes and Ponds Program.</h4>
-<br>
+
+
    
 <h2>Lake Condition Plots</h2>
-Note: click the legend to remove depths from a plot for a cleaner look.
+Note: click the legend to isolate desired depths for a cleaner look.
 
+```{r,echo=FALSE, message=FALSE,warning=FALSE}
+#Plot Setup
+#Subset STA_Surface and STA_Bottom DO measurements
+STA_DOPlot <- subset(STA_DO,depth>3.8 | depth<0.8)
+STA_DOPlot$Depth <- ifelse(STA_DOPlot$depth<0.8, "0.5m", "4.0m")
+#Create new dataset with Date, BGA PC, depth columns.
+STA_PC<-STAdata[,c(1,18,20,21)]
+#Subset STA_Surface BGA PC measurements
+STA_PCPlot <- subset(STA_PC,depth<0.8)
+#GGPlot Setup (DO) Original STA_Surface and STA_Bottom Values Hidden
+#DO <- ggplot(STA_DOPlot, aes(x=Date,y=DO)) + geom_line(aes(col=Depth)) + labs(title="Lake Carmi Dissolved Oxygen", y="DO (mg/L)", x="Date") + scale_y_continuous(breaks=seq(0,16,2), expand = c(0, 0), limits = c(0, 16)) + theme(legend.title=element_blank(), legend.position="STA_Bottom") + scale_color_manual(labels = c("UVM Buoy Site STA_Surface (0.5 meter depth)", "UVM Buoy Site STA_Bottom (8.5 meter depth)"), values=(c("UVM Buoy Site STA_Surface (0.5 meter depth)"="blue", "UVM Buoy Site STA_Bottom (8.5 meter depth)"="red")))
+#ggplotly(DO) %>% layout(legend=list(xanchor="STA_Bottom", yanchor="STA_Bottom",y=0.01,xanchor="left",x=0.01))
+#Full DO Profile Setup
+STA_DOPlot2 <-STA_DO
+STA_DOPlot2$Depth <- ifelse(STA_DOPlot2$depth < 0.8, "0.5m",
+                        ifelse(STA_DOPlot2$depth>0.8 & STA_DOPlot2$depth<1.4, "1.0m",
+                        ifelse(STA_DOPlot2$depth>1.4 & STA_DOPlot2$depth<1.9, "1.5m",
+                        ifelse(STA_DOPlot2$depth>1.9 & STA_DOPlot2$depth<2.4, "2.0m", 
+                        ifelse(STA_DOPlot2$depth>2.4 & STA_DOPlot2$depth<2.9, "2.5m",
+                        ifelse(STA_DOPlot2$depth>2.9 & STA_DOPlot2$depth<3.4, "3.0m",
+                        ifelse(STA_DOPlot2$depth>3.4 & STA_DOPlot2$depth<3.8, "3.5m",
+                               "4.0m")))))))
+#Plot of 0.5, 4.0 meters
+STA_DOPlot3 <- subset(STA_DOPlot2,Depth=="0.5m" |Depth=="4.0m")
+STA_DO2 <- ggplot(STA_DOPlot3,aes(x=Date,y=DO),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Saint Albans Bay Dissolved Oxygen", y="Dissolved Oxygen (mg/L)", x="Date") + scale_y_continuous(breaks=seq(4,16,2), expand = c(0, 0), limits = c(4, 16)) + scale_color_brewer(palette="Set1")
+
+ggplotly(STA_DO2) %>%add_annotations( text="Depth", xref="paper", yref="paper",
+                  x=0.05, xanchor="left",
+                 y=0.2, yanchor="bottom",   
+                 legendtitle=TRUE, showarrow=FALSE ) %>%
+  layout( legend=list(y=0.05, yanchor="bottom",x=0.05, xanchor="left" ) )
+
+#GGPlot Setup (Temp) 
+STA_Temp <- ggplot(STA_DOPlot3, aes(x=Date,y=Temp),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Saint Albans Bay Water Temperature", y="Temperature (*C)", x="Date") + scale_y_continuous(breaks=seq(0,40,2)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_brewer(palette="Set1") 
+ggplotly(STA_Temp)%>%add_annotations( text="Depth", xref="paper", yref="paper",
+                  x=0.05, xanchor="left",
+                 y=0.2, yanchor="bottom",   
+                 legendtitle=TRUE, showarrow=FALSE ) %>%
+  layout( legend=list(y=0.05, yanchor="bottom",x=0.05, xanchor="left" ) )
+
+
+grid.arrange(STA_DO2, STA_Temp, ncol = 2)
+```
 ```{r, echo=FALSE, message=FALSE}
 #Plot Setup
-#Subset surface and bottom DO measurements
-DOPlot <- subset(CarmiDO,depth>8.3 | depth<0.8)
-DOPlot$Depth <- ifelse(DOPlot$depth<5, "UVM Buoy Site Surface (0.5 meter depth)", "UVM Buoy Site Bottom (8.5 meter depth)")
+#Subset MB_Surface and MB_Bottom DO measurements
+MB_DOPlot <- subset(MB_DO,depth>1.8 | depth<0.8)
+MB_DOPlot$Depth <- ifelse(MB_DOPlot$depth<0.8, "0.5m", "2.0m")
 #Create new dataset with Date, BGA PC, depth columns.
-CarmiPC<-carmidata[,c(1,18,20,21)]
-#Subset surface BGA PC measurements
-PCPlot <- subset(CarmiPC,depth<0.8)
-#GGPlot Setup (DO) Original Surface and Bottom Values Hidden
-#DO <- ggplot(DOPlot, aes(x=Date,y=DO)) + geom_line(aes(col=Depth)) + labs(title="Lake Carmi Dissolved Oxygen", y="DO (mg/L)", x="Date") + scale_y_continuous(breaks=seq(0,16,2), expand = c(0, 0), limits = c(0, 16)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_manual(labels = c("UVM Buoy Site Surface (0.5 meter depth)", "UVM Buoy Site Bottom (8.5 meter depth)"), values=(c("UVM Buoy Site Surface (0.5 meter depth)"="blue", "UVM Buoy Site Bottom (8.5 meter depth)"="red")))
-#ggplotly(DO) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
-#Full DO Profile Setup
-DOPlot2 <-CarmiDO
-DOPlot2$Depth <- ifelse(DOPlot2$depth < 0.8, "0.5m",
-                        ifelse(DOPlot2$depth>0.8 & DOPlot2$depth<1.5, "1.0m",
-                        ifelse(DOPlot2$depth>1.5 & DOPlot2$depth<1.8, "1.5m",
-                        ifelse(DOPlot2$depth>1.8 & DOPlot2$depth<2.4, "2.0m", 
-                        ifelse(DOPlot2$depth>2.4 & DOPlot2$depth<3.0, "2.5m",
-                        ifelse(DOPlot2$depth>3.0 & DOPlot2$depth<3.4, "3.0m",
-                        ifelse(DOPlot2$depth>3.4 & DOPlot2$depth<3.9, "3.5m",
-                        ifelse(DOPlot2$depth>3.9 & DOPlot2$depth<4.4, "4.0m",
-                        ifelse(DOPlot2$depth>4.4 & DOPlot2$depth<4.8, "4.5m",
-                        ifelse(DOPlot2$depth>4.8 & DOPlot2$depth<5.4, "5.0m",
-                        ifelse(DOPlot2$depth>5.4 & DOPlot2$depth<5.9, "5.5m",
-                        ifelse(DOPlot2$depth>5.9 & DOPlot2$depth<6.4, "6.0m",
-                        ifelse(DOPlot2$depth>6.4 & DOPlot2$depth<6.9, "6.5m",
-                        ifelse(DOPlot2$depth>6.9 & DOPlot2$depth<7.4, "7.0m",
-                        ifelse(DOPlot2$depth>7.4 & DOPlot2$depth<7.9, "7.5m",
-                        ifelse(DOPlot2$depth>7.9 & DOPlot2$depth<8.4, "8.0m",
-                               "8.5m"))))))))))))))))
-#Plot of 0.5, 5.0, 8.0, 8.5 meters
-DOPlot3 <- subset(DOPlot2,Depth=="0.5m" |Depth=="5.0m" |Depth=="7.5m" | Depth=="8.0m" | Depth=="8.5m")
-DO2 <- ggplot(DOPlot3,aes(x=Date,y=DO),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Lake Carmi Dissolved Oxygen", y="Dissolved Oxygen (mg/L)", x="Date", Depth="Legend") + scale_y_continuous(breaks=seq(0,16,2), expand = c(0, 0), limits = c(0, 16)) + scale_color_brewer(palette="Set1")
-ggplotly(DO2) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
-#GGPlot Setup (Temp) 
-CTemp <- ggplot(DOPlot, aes(x=Date,y=Temp)) + geom_line(aes(col=Depth)) + labs(title="Lake Carmi Water Temperature", y="Temperature (*C)", x="Date") + scale_y_continuous(breaks=seq(0,40,2)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_brewer(palette="Set1") 
-ggplotly(CTemp) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
+STA_PC<-STAdata[,c(1,18,20,21)]
+#Subset STA_Surface BGA PC measurements
+STA_PCPlot <- subset(STA_PC,depth<0.8)
+#Create new dataset with Date, BGA PC, depth columns.
+MB_PC<-MBdata[,c(1,18,20,15)]
+#Subset STA_Surface BGA PC measurements
+MB_PCPlot <- subset(MB_PC,depth<0.8)
 
-grid.arrange(DO2, CTemp, ncol = 2)
+#GGPlot Setup (DO) Original STA_Surface and STA_Bottom Values Hidden
+#DO <- ggplot(MB_DOPlot, aes(x=Date,y=DO)) + geom_line(aes(col=Depth)) + labs(title="Lake Carmi Dissolved Oxygen", y="DO (mg/L)", x="Date") + scale_y_continuous(breaks=seq(0,16,2), expand = c(0, 0), limits = c(0, 16)) + theme(legend.title=element_blank(), legend.position="STA_Bottom") + scale_color_manual(labels = c("UVM Buoy Site STA_Surface (0.5 meter depth)", "UVM Buoy Site STA_Bottom (8.5 meter depth)"), values=(c("UVM Buoy Site STA_Surface (0.5 meter depth)"="blue", "UVM Buoy Site STA_Bottom (8.5 meter depth)"="red")))
+#ggplotly(DO) %>% layout(legend=list(xanchor="STA_Bottom", yanchor="STA_Bottom",y=0.01,xanchor="left",x=0.01))
+#Full DO Profile Setup
+MB_DOPlot2 <-MB_DO
+MB_DOPlot2$Depth <- ifelse(MB_DOPlot2$depth < 0.8, "0.5m",
+                        ifelse(MB_DOPlot2$depth>0.8 & MB_DOPlot2$depth<1.3, "1.0m",
+                        ifelse(MB_DOPlot2$depth>1.3 & MB_DOPlot2$depth<1.8, "1.5m", "2.0m")))
+#Plot of 0.5, 2.0 meters
+MB_DOPlot3 <- subset(MB_DOPlot2,Depth=="0.5m" |Depth=="2.0m")
+MB_DO2 <- ggplot(MB_DOPlot3,aes(x=Date,y=DO),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Missisquoi Bay Dissolved Oxygen", y="Dissolved Oxygen (mg/L)", x="Date", Depth="Legend") + scale_y_continuous(breaks=seq(4,12,2), expand = c(0, 0), limits = c(4, 12)) + scale_color_brewer(palette="Set1")
+ggplotly(MB_DO2) %>%add_annotations( text="Depth", xref="paper", yref="paper",
+                  x=0.05, xanchor="left",
+                 y=0.2, yanchor="bottom",   
+                 legendtitle=TRUE, showarrow=FALSE ) %>%
+  layout( legend=list(y=0.05, yanchor="bottom",x=0.05, xanchor="left" ) )
+#GGPlot Setup (Temp) 
+STA_Temp <- ggplot(MB_DOPlot3, aes(x=Date,y=Temp),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Missisquoi Bay Water Temperature", y="Temperature (*C)", x="Date") + scale_y_continuous(breaks=seq(0,40,2)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_brewer(palette="Set1") 
+ggplotly(STA_Temp)%>%add_annotations( text="Depth", xref="paper", yref="paper",
+                  x=0.05, xanchor="left",
+                 y=0.2, yanchor="bottom",   
+                 legendtitle=TRUE, showarrow=FALSE ) %>%
+  layout( legend=list(y=0.05, yanchor="bottom",x=0.05, xanchor="left" ) )
+
+grid.arrange(MB_DO2, STA_Temp, ncol = 2)
+
 ```
 <br>
 <h2>Biological Activity Plots</h2>
 <p style="background-color:powderblue;">Note: Phycocyanin is a pigment found in cyanobacteria (blue-green algae). Increases in relative fluorescence (RFU) suggest increasing detection of cyanobacteria, but this is not a direct quantitative measurement.There are many caveats associated with using phycocyanin sensors to study cyanobacteria dynamics, but there is general consensus that they are useful for detecting relative changes over time in cyanobacteria biomass at a specific location. Given the propensity of cyanobacteria to concentrate in particular locations in the lake, often due to wind forcing, these point specific sensor data are not necessarily indicative of changes/bloom dynamics across the entire lake at any given time point.</p>
 ```{r, echo=FALSE, message=FALSE}
-#GGPlot Setup (PC)
-PC <- ggplot(PCPlot, aes(x=Date,y=PC)) + geom_line(colour="steelblue3") + labs(title="Lake Carmi Blue Green Algae Phycocyanin (~0.5 meters)", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,11,2), limits = c(0, 11))
-ggplotly(PC)
+#GGPlot Setup (Saint Albans PC)
+STA_PC <- ggplot(STA_PCPlot, aes(x=Date,y=PC)) + geom_line(colour="steelblue3") + labs(title="Saint Albans Bay Blue Green Algae Phycocyanin (~0.5 meters)", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,11,2), limits = c(0, 11))
+ggplotly(STA_PC)
 ```
 
 ```{r, echo=FALSE, message=FALSE}
-#GGPlot Setup (Chl)
-Chl <- ggplot(PCPlot, aes(x=Date,y=Chl)) + geom_line(colour="steelblue3") + labs(title="Lake Carmi Chlorophyll (~0.5 meters)", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,4.0,1), limits = c(0, 4.0))
-ggplotly(Chl)
+#GGPlot Setup (Saint Albans Chl)
+STA_Chl <- ggplot(STA_PCPlot, aes(x=Date,y=Chl)) + geom_line(colour="steelblue3") + labs(title="Saint Albans Bay Chlorophyll (~0.5 meters)", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,4.0,1), limits = c(0, 4.0))
+ggplotly(STA_Chl)
+```
+
+```{r, echo=FALSE, message=FALSE}
+#GGPlot Setup (Missisquoi PC)
+MB_PC <- ggplot(MB_PCPlot, aes(x=Date,y=PC)) + geom_line(colour="steelblue3") + labs(title="Missisquoi Bay Blue Green Algae Phycocyanin (~0.5 meters)", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,11,2), limits = c(0, 11))
+ggplotly(MB_PC)
+```
+
+```{r, echo=FALSE, message=FALSE}
+#GGPlot Setup (Missisquoi Chl)
+MB_Chl <- ggplot(MB_PCPlot, aes(x=Date,y=Chl)) + geom_line(colour="steelblue3") + labs(title="Missisquoi Bay Chlorophyll (~0.5 meters)", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,4.0,1), limits = c(0, 4.0))
+ggplotly(MB_Chl)
 ```
 
 <p style="text-align:center">Please contact us at ashton.kirol@uvm.edu.com and andrew.schroth@uvm.edu with any questions or comments.</p>
