@@ -196,7 +196,7 @@ ggplotly(PC)
 
 ```{r, echo=FALSE, message=FALSE}
 #GGPlot Setup (Chl)
-Chl <- ggplot(PCPlot, aes(x=Date,y=Chl)) + geom_line(colour="steelblue3") + labs(title="Lake Carmi Chlorophyll (~0.5 meters)", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,4.0,1), limits = c(0, 4.0))
+Chl <- ggplot(PCPlot, aes(x=Date,y=Chl)) + geom_line(colour="steelblue3") + labs(title="Lake Carmi Chlorophyll (~0.5 meters)", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,12.0,2), limits = c(0, 12.0))
 ggplotly(Chl)
 ```
 
