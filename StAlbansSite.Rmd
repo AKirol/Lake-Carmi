@@ -58,7 +58,6 @@ document.getElementById('cover-spin').style.display = 'block';
 ```{r,echo=FALSE, message=FALSE,warning=FALSE}
 #<span style="font-size: 10pt;">Updated at 8:30, 12:30, and 16:30 each day</span>
 #<img align="right" height="320" src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/images/platform.png">
-
 #Code to pull csv data, create current condition table:
 #Install + load ggplot2, htmlwidgets, knitr, devtools, plotly, kableExtra
 library(ggplot2)
@@ -72,8 +71,6 @@ STAurlfile = "http://epscor.uvm.edu/StAlbans/STAData-LatestPFLData.csv"
 STAmeturl = "http://epscor.uvm.edu/StAlbans/STAData-LatestMetData.csv"
 MBurlfile = "http://epscor.uvm.edu/StAlbans/MBData-LatestPFLData.csv"
 MBmeturl = "http://epscor.uvm.edu/StAlbans/MBData-LatestMetData.csv"
-
-
 ## Ashton... Start editing names here...
 STAdata <- read.csv(url(STAurlfile), skip=1)
 STAmet <- read.csv(url(STAmeturl), stringsAsFactors = F)
@@ -149,7 +146,6 @@ kable(STA_mytable, align='r',caption="Saint Albans Bay") %>% kable_styling(boots
                 full_width = F,
                 font_size = 12,
                 position = "float_left")
-
 #Missisquoi Table
 MBdata <- read.csv(url(MBurlfile), skip=1)
 MBmet <- read.csv(url(MBmeturl), stringsAsFactors = F)
@@ -225,7 +221,6 @@ kable(MB_mytable, align='r',caption="Missisquoi Bay") %>% kable_styling(bootstra
                 full_width = F,
                 font_size = 12,
                 position = "right")
-
 ```
 
 
@@ -258,38 +253,16 @@ STA_DOPlot2$Depth <- ifelse(STA_DOPlot2$depth < 0.8, "0.5m",
 #Plot of 0.5, 4.0 meters
 STA_DOPlot3 <- subset(STA_DOPlot2,Depth=="0.5m" |Depth=="4.0m")
 STA_DO2 <- ggplot(STA_DOPlot3,aes(x=Date,y=DO),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Saint Albans Bay Dissolved Oxygen", y="Dissolved Oxygen (mg/L)", x="Date") + scale_y_continuous(breaks=seq(0,16,2), expand = c(0, 0), limits = c(0, 16)) + scale_color_brewer(palette="Set1")
-
 #GGPlot Setup (Temp) 
 STA_Temp <- ggplot(STA_DOPlot3, aes(x=Date,y=Temp),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Saint Albans Bay Water Temperature", y="Temperature (*C)", x="Date") + scale_y_continuous(breaks=seq(15,35,5),limits = c(15,35)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_brewer(palette="Set1") 
-```
-<div style="overflow: auto"><div style="float: left; overflow: hidden">
-```{r, echo=FALSE, message=FALSE}
-ggplotly(STA_DO2, width=400) %>%add_annotations( text="Depth", xref="paper", yref="paper",
-                  x=0.05, xanchor="left",
-                 y=0.2, yanchor="bottom",   
-                 legendtitle=TRUE, showarrow=FALSE ) %>%
-  layout( legend=list(y=0.05, yanchor="bottom",x=0.05, xanchor="left" ) )
-```
-</div><div style="float: left; overflow: hidden">
-```{r, echo=FALSE, message=FALSE}
-ggplotly(STA_Temp, width=400) %>%add_annotations( text="Depth", xref="paper", yref="paper",
-                  x=0.05, xanchor="left",
-                 y=0.2, yanchor="bottom",   
-                 legendtitle=TRUE, showarrow=FALSE ) %>%
-  layout( legend=list(y=0.05, yanchor="bottom",x=0.05, xanchor="left" ) )
-```
-</div></div>
-```{r, echo=FALSE, message=FALSE}
-#Plot Setup
+#MB Plot Setup
 #Subset MB_Surface and MB_Bottom DO measurements
 MB_DOPlot <- subset(MB_DO,depth>1.8 | depth<0.8)
 MB_DOPlot$Depth <- ifelse(MB_DOPlot$depth<0.8, "0.5m", "2.0m")
-
 #Create new dataset with Date, BGA PC, depth columns.
 MB_PC<-MBdata[,c(1,21,19,15)]
 #Subset STA_Surface BGA PC measurements
 MB_PCPlot <- subset(MB_PC,depth<0.8)
-
 #GGPlot Setup (DO) Original STA_Surface and STA_Bottom Values Hidden
 #DO <- ggplot(MB_DOPlot, aes(x=Date,y=DO)) + geom_line(aes(col=Depth)) + labs(title="Lake Carmi Dissolved Oxygen", y="DO (mg/L)", x="Date") + scale_y_continuous(breaks=seq(0,16,2), expand = c(0, 0), limits = c(0, 16)) + theme(legend.title=element_blank(), legend.position="STA_Bottom") + scale_color_manual(labels = c("UVM Buoy Site STA_Surface (0.5 meter depth)", "UVM Buoy Site STA_Bottom (8.5 meter depth)"), values=(c("UVM Buoy Site STA_Surface (0.5 meter depth)"="blue", "UVM Buoy Site STA_Bottom (8.5 meter depth)"="red")))
 #ggplotly(DO) %>% layout(legend=list(xanchor="STA_Bottom", yanchor="STA_Bottom",y=0.01,xanchor="left",x=0.01))
@@ -301,49 +274,70 @@ MB_DOPlot2$Depth <- ifelse(MB_DOPlot2$depth < 0.8, "0.5m",
 #Plot of 0.5, 2.0 meters
 MB_DOPlot3 <- subset(MB_DOPlot2,Depth=="0.5m" |Depth=="2.0m")
 MB_DO2 <- ggplot(MB_DOPlot3,aes(x=Date,y=DO),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Missisquoi Bay Dissolved Oxygen", y="Dissolved Oxygen (mg/L)", x="Date", Depth="Legend") + scale_y_continuous(breaks=seq(0,16,2), expand = c(0, 0), limits = c(0, 16)) + scale_color_brewer(palette="Set1")
-ggplotly(MB_DO2) %>%add_annotations( text="Depth", xref="paper", yref="paper",
-                  x=0.05, xanchor="left",
-                 y=0.2, yanchor="bottom",   
-                 legendtitle=TRUE, showarrow=FALSE ) %>%
-  layout( legend=list(y=0.05, yanchor="bottom",x=0.05, xanchor="left" ) )
 #GGPlot Setup (Temp) 
 MB_Temp <- ggplot(MB_DOPlot3, aes(x=Date,y=Temp),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Missisquoi Bay Water Temperature", y="Temperature (*C)", x="Date") + scale_y_continuous(breaks=seq(15,35,5),limits = c(15,35)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_brewer(palette="Set1") 
-ggplotly(MB_Temp)%>%add_annotations( text="Depth", xref="paper", yref="paper",
+```
+<div style="overflow: auto"><div style="float: left; overflow: hidden">
+```{r, echo=FALSE, message=FALSE}
+ggplotly(STA_DO2, width=380) %>%add_annotations( text="Depth", xref="paper", yref="paper",
                   x=0.05, xanchor="left",
                  y=0.2, yanchor="bottom",   
                  legendtitle=TRUE, showarrow=FALSE ) %>%
   layout( legend=list(y=0.05, yanchor="bottom",x=0.05, xanchor="left" ) )
-
-grid.arrange(MB_DO2, MB_Temp, ncol = 2)
-
 ```
+</div><div style="float: left; overflow: hidden">
+```{r, echo=FALSE, message=FALSE}
+ggplotly(MB_DO2, width=380) %>%add_annotations( text="Depth", xref="paper", yref="paper",
+                  x=0.05, xanchor="left",
+                 y=0.2, yanchor="bottom",   
+                 legendtitle=TRUE, showarrow=FALSE ) %>%
+  layout( legend=list(y=0.05, yanchor="bottom",x=0.05, xanchor="left" ) )
+```
+</div></div><div style="overflow: auto"><div style="float: left; overflow: hidden">
+```{r, echo=FALSE, message=FALSE}
+ggplotly(STA_Temp, width=380) %>%add_annotations( text="Depth", xref="paper", yref="paper",
+                  x=0.05, xanchor="left",
+                 y=0.2, yanchor="bottom",   
+                 legendtitle=TRUE, showarrow=FALSE ) %>%
+  layout( legend=list(y=0.05, yanchor="bottom",x=0.05, xanchor="left" ) )
+```
+</div><div style="float: left; overflow: hidden">
+```{r, echo=FALSE, message=FALSE}
+ggplotly(MB_Temp, width=380)%>%add_annotations( text="Depth", xref="paper", yref="paper",
+                  x=0.05, xanchor="left",
+                 y=0.2, yanchor="bottom",   
+                 legendtitle=TRUE, showarrow=FALSE ) %>%
+  layout( legend=list(y=0.05, yanchor="bottom",x=0.05, xanchor="left" ) )
+```
+</div></div><div style="overflow: auto"><div style="float: left; overflow: hidden">
 <br>
 <h2>Biological Activity Plots</h2>
 <p style="background-color:powderblue;">Note: Phycocyanin is a pigment found in cyanobacteria (blue-green algae). Increases in relative fluorescence (RFU) suggest increasing detection of cyanobacteria, but this is not a direct quantitative measurement.There are many caveats associated with using phycocyanin sensors to study cyanobacteria dynamics, but there is general consensus that they are useful for detecting relative changes over time in cyanobacteria biomass at a specific location. Given the propensity of cyanobacteria to concentrate in particular locations in the lake, often due to wind forcing, these point specific sensor data are not necessarily indicative of changes/bloom dynamics across the entire lake at any given time point.</p>
+<div style="overflow: auto"><div style="float: left; overflow: hidden">
 ```{r, echo=FALSE, message=FALSE}
 #GGPlot Setup (Saint Albans PC)
-STA_PC <- ggplot(STA_PCPlot, aes(x=Date,y=PC)) + geom_line(colour="steelblue3") + labs(title="Saint Albans Bay Blue Green Algae Phycocyanin (~0.5 meters)", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(-2,14,2), limits = c(-2, 14))
-ggplotly(STA_PC)
+STA_PC <- ggplot(STA_PCPlot, aes(x=Date,y=PC)) + geom_line(colour="steelblue3") + labs(title="St. Albans Bay Blue Green Algae Phycocyanin (~0.5 meters)", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(-2,14,2), limits = c(-2, 14))
+ggplotly(STA_PC, width=380)
 ```
-
-```{r, echo=FALSE, message=FALSE}
-#GGPlot Setup (Saint Albans Chl)
-STA_Chl <- ggplot(STA_PCPlot, aes(x=Date,y=Chl)) + geom_line(colour="steelblue3") + labs(title="Saint Albans Bay Chlorophyll (~0.5 meters)", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(-2,10,2), limits = c(-2, 10))
-ggplotly(STA_Chl)
-```
-
+</div><div style="float: left; overflow: hidden">
 ```{r, echo=FALSE, message=FALSE}
 #GGPlot Setup (Missisquoi PC)
 MB_PC <- ggplot(MB_PCPlot, aes(x=Date,y=PC)) + geom_line(colour="steelblue3") + labs(title="Missisquoi Bay Blue Green Algae Phycocyanin (~0.5 meters)", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(-2,14,2), limits = c(-2, 14))
-ggplotly(MB_PC)
+ggplotly(MB_PC, width=380)
 ```
-
+</div></div><div style="overflow: auto"><div style="float: left; overflow: hidden">
+```{r, echo=FALSE, message=FALSE}
+#GGPlot Setup (Saint Albans Chl)
+STA_Chl <- ggplot(STA_PCPlot, aes(x=Date,y=Chl)) + geom_line(colour="steelblue3") + labs(title="St. Albans Bay Chlorophyll (~0.5 meters)", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(-2,10,2), limits = c(-2, 10))
+ggplotly(STA_Chl,width=380)
+```
+</div><div style="float: left; overflow: hidden">
 ```{r, echo=FALSE, message=FALSE}
 #GGPlot Setup (Missisquoi Chl)
 MB_Chl <- ggplot(MB_PCPlot, aes(x=Date,y=Chl)) + geom_line(colour="steelblue3") + labs(title="Missisquoi Bay Chlorophyll (~0.5 meters)", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(-2,10,2), limits = c(-2, 10))
-ggplotly(MB_Chl)
+ggplotly(MB_Chl,width=380)
 ```
-
+</div></div>
 <p style="text-align:center">Please contact us at ashton.kirol@uvm.edu.com and andrew.schroth@uvm.edu with any questions or comments.</p>
 
 <table style="width: 80%; border: 0px; margin-left:auto; margin-right:auto"><tr><td><img src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/images/NSF.png" style="width: 300px"></td><td style="vertical-align: middle">These data and infrastructure are also sourced in research support provided to Andrew Schroth by the National Science Foundation under under VT EPSCoR Grant No. NSF OIA-1556770 and EAR-1561014. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation.</td></tr></table>
