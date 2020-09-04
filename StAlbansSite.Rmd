@@ -316,25 +316,25 @@ ggplotly(MB_Temp, width=380)%>%add_annotations( text="Depth", xref="paper", yref
 <div style="overflow: auto"><div style="float: left; overflow: hidden">
 ```{r, echo=FALSE, message=FALSE}
 #GGPlot Setup (Saint Albans PC)
-STA_PC <- ggplot(STA_PCPlot, aes(x=Date,y=PC)) + geom_line(colour="steelblue3") + labs(title="St. Albans Bay Blue Green Algae Phycocyanin (~0.5 meters)", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(-2,14,2), limits = c(-2, 14))
-ggplotly(STA_PC, width=380)
+STA_PC <- ggplot(STA_PCPlot, aes(x=Date,y=PC)) + geom_line(colour="steelblue3") + labs(title="Saint Albans Bay Blue Green Algae \nPhycocyanin (~0.5 meters)", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(-2,14,2), limits = c(-2, 14))
+ggplotly(STA_PC,width=380)
 ```
 </div><div style="float: left; overflow: hidden">
 ```{r, echo=FALSE, message=FALSE}
 #GGPlot Setup (Missisquoi PC)
-MB_PC <- ggplot(MB_PCPlot, aes(x=Date,y=PC)) + geom_line(colour="steelblue3") + labs(title="Missisquoi Bay Blue Green Algae Phycocyanin (~0.5 meters)", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(-2,14,2), limits = c(-2, 14))
+MB_PC <- ggplot(MB_PCPlot, aes(x=Date,y=PC)) + geom_line(colour="steelblue3") + labs(title="Missisquoi Bay Blue Green Algae \nPhycocyanin (~0.5 meters)", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(-2,14,2), limits = c(-2, 14))
 ggplotly(MB_PC, width=380)
 ```
 </div></div><div style="overflow: auto"><div style="float: left; overflow: hidden">
 ```{r, echo=FALSE, message=FALSE}
 #GGPlot Setup (Saint Albans Chl)
-STA_Chl <- ggplot(STA_PCPlot, aes(x=Date,y=Chl)) + geom_line(colour="steelblue3") + labs(title="St. Albans Bay Chlorophyll (~0.5 meters)", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(-2,10,2), limits = c(-2, 10))
+STA_Chl <- ggplot(STA_PCPlot, aes(x=Date,y=Chl)) + geom_line(colour="steelblue3") + labs(title="Saint Albans Bay \nChlorophyll (~0.5 meters)", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(-2,10,2), limits = c(-2, 10))
 ggplotly(STA_Chl,width=380)
 ```
 </div><div style="float: left; overflow: hidden">
 ```{r, echo=FALSE, message=FALSE}
 #GGPlot Setup (Missisquoi Chl)
-MB_Chl <- ggplot(MB_PCPlot, aes(x=Date,y=Chl)) + geom_line(colour="steelblue3") + labs(title="Missisquoi Bay Chlorophyll (~0.5 meters)", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(-2,10,2), limits = c(-2, 10))
+MB_Chl <- ggplot(MB_PCPlot, aes(x=Date,y=Chl)) + geom_line(colour="steelblue3") + labs(title="Missisquoi Bay \nChlorophyll (~0.5 meters)", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(-2,10,2), limits = c(-2, 10))
 ggplotly(MB_Chl,width=380)
 ```
 </div></div>
