@@ -66,6 +66,7 @@ library(kableExtra)
 library(lubridate)
 library(fpp2)
 library(zoo)
+library(dplyr)
 urlfile = "http://epscor.uvm.edu/LakeCarmi/CarmiData-LatestPFLData.csv"
 carmidata <- read.csv(url(urlfile), skip=1)
 meturl = "http://epscor.uvm.edu/LakeCarmi/CarmiData-LatestMetData.csv"
