@@ -84,6 +84,7 @@ MBmeturl = "http://epscor.uvm.edu/StAlbans/MBData-LatestMetData.csv"
 ## Ashton... Start editing names here...
 STAdata <- read.csv(url(STAurlfile), skip=1)
 STAmet <- read.csv(url(STAmeturl), stringsAsFactors = F)
+STAmet <- na.omit(STAmet)
 #STAmettable <- STAmet[,c(3,4,9)]
 STAmettable <- STAmet
 #Rename columns to be used
