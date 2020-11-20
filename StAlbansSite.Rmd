@@ -183,6 +183,8 @@ MBdata$PC <- as.numeric(MBdata$PC)
 MBdata$Temp <- as.numeric(MBdata$Temp)
 #Create new dataset with Date, Temp, DO, depth columns.
 MB_DO <- MBdata[,c(1,12,23,15)]
+#Set DO O's to NA
+MB_DO[3][MB_DO[3]<=0] <- NA
 #Subset MB_Surface and MB_Bottom DO measurements
 MB_Surface <- subset(MB_DO,depth<0.8)
 MB_Bottom <- subset(MB_DO,depth>1.8)
