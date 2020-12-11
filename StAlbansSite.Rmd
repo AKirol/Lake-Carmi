@@ -60,6 +60,10 @@ output:
 document.getElementById('cover-spin').style.display = 'block';
 </script>
 
+<h2>Live Updates Will Resume Spring 2021</h2>
+<span style="font-size: 14pt;">2020 condition plots available below</span>
+<br>
+
 <img src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/Missisquoi.png" style="width: 100%;">
 <p style="text-align:right;">Image: Missisquoi Bay, July 2020</p>
 <br>
@@ -153,10 +157,7 @@ STA_mytable$`Wind Direction` <- d2c.2(STA_mytable$`Wind Direction`)
 #Format table for printing
 rownames(STA_mytable) <- c(" ")
 STA_mytable <- t(STA_mytable)
-kable(STA_mytable, align='r',caption="Saint Albans Bay") %>% kable_styling(bootstrap_options = c("striped", "hover"),
-                full_width = F,
-                font_size = 12,
-                position = "float_left")
+
 #Missisquoi Table
 MBdata <- read.csv(url(MBurlfile), skip=1)
 MBmet <- read.csv(url(MBmeturl), stringsAsFactors = F)
@@ -230,15 +231,12 @@ MB_mytable$`Wind Direction` <- d2c.2(MB_mytable$`Wind Direction`)
 #Format table for printing
 rownames(MB_mytable) <- c(" ")
 MB_mytable <- t(MB_mytable)
-kable(MB_mytable, align='r',caption="Missisquoi Bay") %>% kable_styling(bootstrap_options = c("striped", "hover"),
-                full_width = F,
-                font_size = 12,
-                position = "right")
+
 ```
 
 
    
-<h2>Lake Condition Plots</h2>
+<h2>2020 Lake Condition Plots</h2>
 Note: click the legend to isolate desired depths for a cleaner look.
 
 ```{r,echo=FALSE, message=FALSE,warning=FALSE}
