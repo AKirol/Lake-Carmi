@@ -60,9 +60,11 @@ output:
 document.getElementById('cover-spin').style.display = 'block';
 </script>
 
-<h2>Recent Lake Conditions</h2>
-<span style="font-size: 10pt;">Updated at 8:30, 12:30, and 16:30 each day</span>
-<img align="right" height="320" src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/images/platform.png">
+<h2>Live Updates Will Resume Spring 2021</h2>
+<span style="font-size: 14pt;">2020 condition plots available below</span>
+<br>
+<img align="center" height="320" src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/images/platform.png">
+<br>
 
 ```{r,echo=FALSE, message=FALSE,warning=FALSE}
 #Code to pull csv data, create current condition table:
@@ -149,10 +151,6 @@ mytable$`Wind Direction` <- d2c.2(mytable$`Wind Direction`)
 #Format table for printing
 rownames(mytable) <- c(" ")
 mytable <- t(mytable)
-kable(mytable, align='r') %>% kable_styling(bootstrap_options = c("striped", "hover"),
-                full_width = F,
-                font_size = 12,
-                position = "left")
 ```
 <h4>The collection of these data and the larger Lake Carmi research project are primarily supported by Vermont Department of Environmental Conservation under the Clean Water Initiative, and conducted in collaboration with the Vermont DEC's Lakes and Ponds Program.</h4>
 <br>
@@ -179,7 +177,6 @@ names(PCPlot2)[3] <- "Data"
 NewPCPlot<-rbind(NewPCPlot,PCPlot2)
 NewPCPlot$PC <- round(NewPCPlot$PC,digits=2)
 NewPCPlot$PC <- as.numeric(NewPCPlot$PC)
-
 ChlPlot<-PCPlot %>% select(Date,Chl) %>% mutate(Chlavg=rollmean(Chl,k=24,fill=NA))
 ChlPlot2<-PCPlot%>% select(Date,Chl,depth)
 ChlPlot2$depth <- "Profiler Measurement"
@@ -190,7 +187,6 @@ names(ChlPlot)[3] <- "Data"
 ChlPlot<-rbind(ChlPlot,ChlPlot2)
 ChlPlot$Chl <- round(ChlPlot$Chl,digits=2)
 ChlPlot$Chl <- as.numeric(ChlPlot$Chl)
-
 #GGPlot Setup (DO) Original Surface and Bottom Values Hidden
 #DO <- ggplot(DOPlot, aes(x=Date,y=DO)) + geom_line(aes(col=Depth)) + labs(title="Lake Carmi Dissolved Oxygen", y="DO (mg/L)", x="Date") + scale_y_continuous(breaks=seq(0,16,2), expand = c(0, 0), limits = c(0, 16)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_manual(labels = c("UVM Buoy Site Surface (0.5 meter depth)", "UVM Buoy Site Bottom (8.5 meter depth)"), values=(c("UVM Buoy Site Surface (0.5 meter depth)"="blue", "UVM Buoy Site Bottom (8.5 meter depth)"="red")))
 #ggplotly(DO) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
