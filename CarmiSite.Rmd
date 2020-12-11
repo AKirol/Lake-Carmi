@@ -155,7 +155,7 @@ mytable <- t(mytable)
 <h4>The collection of these data and the larger Lake Carmi research project are primarily supported by Vermont Department of Environmental Conservation under the Clean Water Initiative, and conducted in collaboration with the Vermont DEC's Lakes and Ponds Program.</h4>
 <br>
    
-<h2>Lake Condition Plots</h2>
+<h2>2020 Lake Condition Plots</h2>
 Note: click the legend to remove depths from a plot for a cleaner look.
 
 ```{r, echo=FALSE, message=FALSE}
