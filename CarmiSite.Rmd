@@ -60,11 +60,9 @@ output:
 document.getElementById('cover-spin').style.display = 'block';
 </script>
 
-<h2>Live Updates Will Resume Spring 2021</h2>
-<span style="font-size: 14pt;">2020 condition plots available below</span>
-<br>
-<img align="center" height="320" src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/images/platform.png">
-<br>
+<h2>Recent Lake Conditions</h2>
+<span style="font-size: 10pt;">Updated at 8:30, 12:30, and 16:30 each day</span>
+<img align="right" height="320" src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/images/platform.png">
 
 ```{r,echo=FALSE, message=FALSE,warning=FALSE}
 #Code to pull csv data, create current condition table:
@@ -80,7 +78,14 @@ library(fpp2)
 library(zoo)
 library(dplyr)
 urlfile = "http://epscor.uvm.edu/LakeCarmi/CarmiData-LatestPFLData.csv"
-carmidata <- read.csv(url(urlfile), skip=1)
+carmidataTEMP <- read.csv(url(urlfile), skip=1)
+carmidataTEMP$Date <- strptime(carmidataTEMP$TIMESTAMP, "%Y-%m-%d %H:%M:%S")
+carmidataTEMP$Date<- as.POSIXct(carmidataTEMP$Date)
+carmidataTEMP$Year <- carmidataTEMP$Date
+carmidataTEMP$Year <- format(carmidataTEMP$Year, format="%Y")
+
+
+carmidata <- subset(carmidataTEMP, Year==2021)
 meturl = "http://epscor.uvm.edu/LakeCarmi/CarmiData-LatestMetData.csv"
 carmimet <- read.csv(url(meturl), stringsAsFactors = F)
 #mettable <- carmimet[,c(3,4,9)]
@@ -151,18 +156,22 @@ mytable$`Wind Direction` <- d2c.2(mytable$`Wind Direction`)
 #Format table for printing
 rownames(mytable) <- c(" ")
 mytable <- t(mytable)
+kable(mytable, align='r') %>% kable_styling(bootstrap_options = c("striped", "hover"),
+                full_width = F,
+                font_size = 12,
+                position = "left")
 ```
 <h4>The collection of these data and the larger Lake Carmi research project are primarily supported by Vermont Department of Environmental Conservation under the Clean Water Initiative, and conducted in collaboration with the Vermont DEC's Lakes and Ponds Program.</h4>
 <br>
    
-<h2>2020 Lake Condition Plots</h2>
+<h2>Lake Condition Plots</h2>
 Note: click the legend to remove depths from a plot for a cleaner look.
 
 ```{r, echo=FALSE, message=FALSE}
 #Plot Setup
 #Subset surface and bottom DO measurements
-DOPlot <- subset(CarmiDO,depth>8.3 | depth<0.8)
-DOPlot$Depth <- ifelse(DOPlot$depth<5, "UVM Buoy Site Surface (0.5 meter depth)", "UVM Buoy Site Bottom (8.5 meter depth)")
+DOPlot <- subset(CarmiDO,depth>8.9 | depth<0.8)
+DOPlot$Depth <- ifelse(DOPlot$depth<5, "UVM Buoy Site Surface (0.5 meter depth)", "UVM Buoy Site Bottom (9.0 meter depth)")
 #Create new dataset with Date, BGA PC, depth columns.
 CarmiPC<-carmidata[,c(1,18,20,21)]
 #Subset surface BGA PC measurements
@@ -208,10 +217,11 @@ DOPlot2$Depth <- ifelse(DOPlot2$depth < 0.8, "0.5m",
                         ifelse(DOPlot2$depth>6.9 & DOPlot2$depth<7.4, "7.0m",
                         ifelse(DOPlot2$depth>7.4 & DOPlot2$depth<7.9, "7.5m",
                         ifelse(DOPlot2$depth>7.9 & DOPlot2$depth<8.4, "8.0m",
-                               "8.5m"))))))))))))))))
+                        ifelse(DOPlot2$depth>8.4 & DOPlot2$depth<8.9, "8.5m",
+                               "9.0m")))))))))))))))))
 #Plot of 0.5, 5.0, 8.0, 8.5 meters
-DOPlot3 <- subset(DOPlot2,Depth=="0.5m" |Depth=="5.0m" |Depth=="7.5m" | Depth=="8.0m" | Depth=="8.5m")
-DO2 <- ggplot(DOPlot3,aes(x=Date,y=DO),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Lake Carmi Dissolved Oxygen", y="Dissolved Oxygen (mg/L)", x="Date", Depth="Legend") + scale_y_continuous(breaks=seq(0,16,2), expand = c(0, 0), limits = c(0, 16)) + scale_color_brewer(palette="Set1")
+DOPlot3 <- subset(DOPlot2,Depth=="0.5m" |Depth=="5.0m" |Depth=="7.5m" | Depth=="8.0m" | Depth=="8.5m" | Depth=="9.0m")
+DO2 <- ggplot(DOPlot3,aes(x=Date,y=DO),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Lake Carmi Dissolved Oxygen", y="Dissolved Oxygen (mg/L)", x="Date", Depth="Legend") + scale_y_continuous(breaks=seq(0,16,2), expand = c(0, 0), limits = c(0, 16)) + scale_color_brewer(palette="Paired")
 ggplotly(DO2) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
 #GGPlot Setup (Temp) 
 CTemp <- ggplot(DOPlot, aes(x=Date,y=Temp)) + geom_line(aes(col=Depth)) + labs(title="Lake Carmi Water Temperature", y="Temperature (*C)", x="Date") + scale_y_continuous(breaks=seq(0,40,2)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_brewer(palette="Set1") 
