@@ -113,7 +113,7 @@ carmidata$Temp <- as.numeric(carmidata$Temp)
 CarmiDO <- carmidata[,c(1,6,16,21)]
 #Subset surface and bottom DO measurements
 Surface <- subset(CarmiDO,depth<0.8)
-Bottom <- subset(CarmiDO,depth>8.3)
+Bottom <- subset(CarmiDO,depth>8.3 & depth<8.9)
 #Pull data for recent conditions table, rename, format
 mytable <- tail(Surface,1)
 mytable <- mytable[,c(1,2)]
