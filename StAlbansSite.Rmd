@@ -4,20 +4,16 @@ output:
   html_document: default
   pdf_document: default
 ---
-
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-178011310-1"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'UA-178011310-1');
 </script>
-
 <!--Spinner code below from:
   http://www.menucool.com/9499/CSS-loading-spinner-with-a-semi-transparent-background-->
-
 <style>
 #cover-spin {
     position:fixed;
@@ -27,17 +23,14 @@ output:
     z-index:9999;
     display:none;
 }
-
 @-webkit-keyframes spin {
   from {-webkit-transform:rotate(0deg);}
   to {-webkit-transform:rotate(360deg);}
 }
-
 @keyframes spin {
   from {transform:rotate(0deg);}
   to {transform:rotate(360deg);}
 }
-
 #cover-spin::after {
     content:'';
     display:block;
@@ -53,22 +46,14 @@ output:
     animation: spin .8s linear infinite;
 }
 </style>
-
 <div id="cover-spin"></div>
-
 <script>
 document.getElementById('cover-spin').style.display = 'block';
 </script>
-
-<h2>Live Updates Will Resume Spring 2021</h2>
-<span style="font-size: 14pt;">2020 condition plots available below</span>
 <br>
-
 <img src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/Missisquoi.png" style="width: 100%;">
 <p style="text-align:right;">Image: Missisquoi Bay, July 2020</p>
 <br>
-
-
 ```{r,echo=FALSE, message=FALSE,warning=FALSE}
 #<span style="font-size: 10pt;">Updated at 8:30, 12:30, and 16:30 each day</span>
 #<img align="right" height="320" src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/images/platform.png">
@@ -85,10 +70,10 @@ STAurlfile = "http://epscor.uvm.edu/StAlbans/STAData-LatestPFLData.csv"
 STAmeturl = "http://epscor.uvm.edu/StAlbans/STAData-LatestMetData.csv"
 MBurlfile = "http://epscor.uvm.edu/StAlbans/MBData-LatestPFLData.csv"
 MBmeturl = "http://epscor.uvm.edu/StAlbans/MBData-LatestMetData.csv"
-## Ashton... Start editing names here...
 STAdata <- read.csv(url(STAurlfile), skip=1)
 STAmet <- read.csv(url(STAmeturl), stringsAsFactors = F)
 STAmet <- na.omit(STAmet)
+
 #STAmettable <- STAmet[,c(3,4,9)]
 STAmettable <- STAmet
 #Rename columns to be used
@@ -104,6 +89,10 @@ names(STAdata)[21] <- "depth" #set
 #Format date column
 STAdata$Date <- strptime(STAdata$Date, "%Y-%m-%d %H:%M:%S")
 STAdata$Date<- as.POSIXct(STAdata$Date)
+#Add Year column and select for current year
+STAdata$Year <- STAdata$Date
+STAdata$Year <- format(STAdata$Year, format="%Y")
+STAdata<-subset(STAdata, Year=="2021")
 #Format columns as numeric
 STAdata$DO <- as.numeric(STAdata$DO)
 STAdata$depth <- as.numeric(STAdata$depth)
@@ -157,7 +146,10 @@ STA_mytable$`Wind Direction` <- d2c.2(STA_mytable$`Wind Direction`)
 #Format table for printing
 rownames(STA_mytable) <- c(" ")
 STA_mytable <- t(STA_mytable)
-
+kable(STA_mytable, align='r',caption="Saint Albans Bay") %>% kable_styling(bootstrap_options = c("striped", "hover"),
+                full_width = F,
+                font_size = 12,
+                position = "float_left")
 #Missisquoi Table
 MBdata <- read.csv(url(MBurlfile), skip=1)
 MBmet <- read.csv(url(MBmeturl), stringsAsFactors = F)
@@ -176,6 +168,10 @@ names(MBdata)[21] <- "depth" #set
 #Format date column
 MBdata$Date <- strptime(MBdata$Date, "%Y-%m-%d %H:%M:%S")
 MBdata$Date<- as.POSIXct(MBdata$Date)
+#Add Year column and select for current year
+MBdata$Year <- MBdata$Date
+MBdata$Year <- format(MBdata$Year, format="%Y")
+MBdata<-subset(MBdata, Year=="2021")
 #Format columns as numeric
 MBdata$DO <- as.numeric(MBdata$DO)
 MBdata$depth <- as.numeric(MBdata$depth)
@@ -183,6 +179,7 @@ MBdata$Chl <- as.numeric(MBdata$Chl)
 MBdata$PC <- as.numeric(MBdata$PC)
 MBdata$Temp <- as.numeric(MBdata$Temp)
 #Create new dataset with Date, Temp, DO, depth columns.
+MB_DO <- MBdata[,c(1,12,23,15)]
 MB_DO <- MBdata[,c(1,6,16,21)]
 #Set DO O's to NA
 MB_DO[3][MB_DO[3]<=0] <- NA
@@ -231,14 +228,14 @@ MB_mytable$`Wind Direction` <- d2c.2(MB_mytable$`Wind Direction`)
 #Format table for printing
 rownames(MB_mytable) <- c(" ")
 MB_mytable <- t(MB_mytable)
-
+kable(MB_mytable, align='r',caption="Missisquoi Bay") %>% kable_styling(bootstrap_options = c("striped", "hover"),
+                full_width = F,
+                font_size = 12,
+                position = "right")
 ```
-
-
    
-<h2>2020 Lake Condition Plots</h2>
+<h2>2021 Lake Condition Plots</h2>
 Note: click the legend to isolate desired depths for a cleaner look.
-
 ```{r,echo=FALSE, message=FALSE,warning=FALSE}
 #Plot Setup
 #Subset STA_Surface and STA_Bottom DO measurements
@@ -270,6 +267,8 @@ STA_Temp <- ggplot(STA_DOPlot3, aes(x=Date,y=Temp),color=Depth) + geom_line(aes(
 #Subset MB_Surface and MB_Bottom DO measurements
 MB_DOPlot <- subset(MB_DO,depth>1.8 | depth<0.8)
 MB_DOPlot$Depth <- ifelse(MB_DOPlot$depth<0.8, "0.5m", "2.0m")
+#Create new dataset with Date, BGA PC, depth columns.
+MB_PC<-MBdata[,c(1,21,19,15)]
 #Create new dataset with Date, CHLA, BGA PC, depth columns.
 MB_PC<-MBdata[,c(1,18,20,21)]
 #Subset STA_Surface BGA PC measurements
@@ -350,10 +349,8 @@ ggplotly(MB_Chl,width=380)
 ```
 </div></div>
 <p style="text-align:center">Please contact us at ashton.kirol@uvm.edu.com and andrew.schroth@uvm.edu with any questions or comments.</p>
-
 <table style="width: 80%; border: 0px; margin-left:auto; margin-right:auto"><tr><td><img src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/images/NSF.png" style="width: 300px"></td><td style="vertical-align: middle">These data and infrastructure are also sourced in research support provided to Andrew Schroth by the National Science Foundation under under VT EPSCoR Grant No. NSF OIA-1556770 and EAR-1561014. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation.</td></tr></table>
 <br>
-
 <script>
 document.getElementById('cover-spin').style.display = 'none';
 </script>
