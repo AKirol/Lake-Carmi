@@ -183,7 +183,7 @@ MBdata$Chl <- as.numeric(MBdata$Chl)
 MBdata$PC <- as.numeric(MBdata$PC)
 MBdata$Temp <- as.numeric(MBdata$Temp)
 #Create new dataset with Date, Temp, DO, depth columns.
-MB_DO <- MBdata[,c(1,12,23,15)]
+MB_DO <- MBdata[,c(1,6,16,21)]
 #Set DO O's to NA
 MB_DO[3][MB_DO[3]<=0] <- NA
 #Subset MB_Surface and MB_Bottom DO measurements
@@ -270,8 +270,8 @@ STA_Temp <- ggplot(STA_DOPlot3, aes(x=Date,y=Temp),color=Depth) + geom_line(aes(
 #Subset MB_Surface and MB_Bottom DO measurements
 MB_DOPlot <- subset(MB_DO,depth>1.8 | depth<0.8)
 MB_DOPlot$Depth <- ifelse(MB_DOPlot$depth<0.8, "0.5m", "2.0m")
-#Create new dataset with Date, BGA PC, depth columns.
-MB_PC<-MBdata[,c(1,21,19,15)]
+#Create new dataset with Date, CHLA, BGA PC, depth columns.
+MB_PC<-MBdata[,c(1,18,20,21)]
 #Subset STA_Surface BGA PC measurements
 MB_PCPlot <- subset(MB_PC,depth<0.8)
 #GGPlot Setup (DO) Original STA_Surface and STA_Bottom Values Hidden
