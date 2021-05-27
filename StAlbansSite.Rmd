@@ -165,11 +165,11 @@ MBmet <- read.csv(url(MBmeturl), stringsAsFactors = F)
 MBmettable <- MBmet
 #Rename columns to be used
 names(MBdata)[1] <- "Date" #set
-names(MBdata)[12] <- "Temp" #set
-names(MBdata)[23] <- "DO" #set
-names(MBdata)[21] <- "Chl" #Need Column
-names(MBdata)[19] <- "PC" #Need Column
-names(MBdata)[15] <- "depth" #set
+names(MBdata)[6] <- "Temp" #set
+names(MBdata)[16] <- "DO" #set
+names(MBdata)[18] <- "Chl" #Need Column
+names(MBdata)[20] <- "PC" #Need Column
+names(MBdata)[21] <- "depth" #set
 #Remove rows without data.
 # MBdata <- subset(MBdata, Date !="TIMESTAMP" & Date !="TS")
 # MBdata <- subset(MBdata, CR1000 !="Smp")
