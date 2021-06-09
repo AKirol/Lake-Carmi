@@ -101,6 +101,22 @@ STAdata$depth <- as.numeric(STAdata$depth)
 STAdata$Chl <- as.numeric(STAdata$Chl)
 STAdata$PC <- as.numeric(STAdata$PC)
 STAdata$Temp <- as.numeric(STAdata$Temp)
+
+#Edit to remove gaps
+STAdata2 <- STAdata %>%
+  arrange(Date) %>%
+  mutate(date.diff = c(NA, diff(Date))) %>%
+  mutate(is.gap = !is.na(date.diff) & date.diff > median(date.diff, na.rm = TRUE)) %>%
+  mutate(period.id = cumsum(is.gap))
+STAdata2$date.diff <- as.numeric(STAdata2$date.diff)
+STAdata2$Gap<-ifelse(STAdata2$date.diff>=5000 | is.na(STAdata2$date.diff),STAdata2$PFL_Counter,NA)
+STAdata2$PFL_Counter <- ifelse(STAdata2$PFL_Counter%in%STAdata2$Gap,NA,STAdata2$PFL_Counter)
+STAdata2$Temp<-ifelse(is.na(STAdata2$PFL_Counter),NA,STAdata2$Temp)
+STAdata2$DO<-ifelse(is.na(STAdata2$PFL_Counter),NA,STAdata2$DO)
+STAdata2$PC<-ifelse(is.na(STAdata2$PFL_Counter),NA,STAdata2$PC)
+STAdata2$Chl<-ifelse(is.na(STAdata2$PFL_Counter),NA,STAdata2$Chl)
+STAdata<-STAdata2
+
 #Create new dataset with Date, Temp, DO, depth columns.
 STA_DO <- STAdata[,c(1,6,16,21)]
 #Subset STA_Surface and STA_Bottom DO measurements
@@ -180,6 +196,22 @@ MBdata$depth <- as.numeric(MBdata$depth)
 MBdata$Chl <- as.numeric(MBdata$Chl)
 MBdata$PC <- as.numeric(MBdata$PC)
 MBdata$Temp <- as.numeric(MBdata$Temp)
+
+#Edit to remove gaps
+MBdata2 <- MBdata %>%
+  arrange(Date) %>%
+  mutate(date.diff = c(NA, diff(Date))) %>%
+  mutate(is.gap = !is.na(date.diff) & date.diff > median(date.diff, na.rm = TRUE)) %>%
+  mutate(period.id = cumsum(is.gap))
+MBdata2$date.diff <- as.numeric(MBdata2$date.diff)
+MBdata2$Gap<-ifelse(MBdata2$date.diff>=5000 | is.na(MBdata2$date.diff),MBdata2$PFL_Counter,NA)
+MBdata2$PFL_Counter <- ifelse(MBdata2$PFL_Counter%in%MBdata2$Gap,NA,MBdata2$PFL_Counter)
+MBdata2$Temp<-ifelse(is.na(MBdata2$PFL_Counter),NA,MBdata2$Temp)
+MBdata2$DO<-ifelse(is.na(MBdata2$PFL_Counter),NA,MBdata2$DO)
+MBdata2$PC<-ifelse(is.na(MBdata2$PFL_Counter),NA,MBdata2$PC)
+MBdata2$Chl<-ifelse(is.na(MBdata2$PFL_Counter),NA,MBdata2$Chl)
+MBdata<-MBdata2
+
 #Create new dataset with Date, Temp, DO, depth columns.
 MB_DO <- MBdata[,c(1,12,23,15)]
 MB_DO <- MBdata[,c(1,6,16,21)]
