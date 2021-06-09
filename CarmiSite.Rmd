@@ -79,12 +79,10 @@ library(zoo)
 library(dplyr)
 urlfile = "http://epscor.uvm.edu/LakeCarmi/CarmiData-LatestPFLData.csv"
 carmidataTEMP <- read.csv(url(urlfile), skip=1)
-carmidataTEMP$Date <- strptime(carmidataTEMP$TIMESTAMP, "%Y-%m-%d %H:%M:%S")
-carmidataTEMP$Date<- as.POSIXct(carmidataTEMP$Date)
-carmidataTEMP$Year <- carmidataTEMP$Date
+carmidataTEMP$Date1 <- strptime(carmidataTEMP$TIMESTAMP, "%Y-%m-%d %H:%M:%S")
+carmidataTEMP$Date1<- as.POSIXct(carmidataTEMP$Date1)
+carmidataTEMP$Year <- carmidataTEMP$Date1
 carmidataTEMP$Year <- format(carmidataTEMP$Year, format="%Y")
-
-
 carmidata <- subset(carmidataTEMP, Year==2021)
 meturl = "http://epscor.uvm.edu/LakeCarmi/CarmiData-LatestMetData.csv"
 carmimet <- read.csv(url(meturl), stringsAsFactors = F)
@@ -109,6 +107,22 @@ carmidata$depth <- as.numeric(carmidata$depth)
 carmidata$Chl <- as.numeric(carmidata$Chl)
 carmidata$PC <- as.numeric(carmidata$PC)
 carmidata$Temp <- as.numeric(carmidata$Temp)
+
+#Edit to remove gaps
+carmidata2 <- carmidata %>%
+  arrange(Date) %>%
+  mutate(date.diff = c(NA, diff(Date))) %>%
+  mutate(is.gap = !is.na(date.diff) & date.diff > median(date.diff, na.rm = TRUE)) %>%
+  mutate(period.id = cumsum(is.gap))
+carmidata2$date.diff <- as.numeric(carmidata2$date.diff)
+carmidata2$Gap<-ifelse(carmidata2$date.diff>=5000 | is.na(carmidata2$date.diff),carmidata2$PFL_Counter,NA)
+carmidata2$PFL_Counter <- ifelse(carmidata2$PFL_Counter%in%carmidata2$Gap,NA,carmidata2$PFL_Counter)
+carmidata2$Temp<-ifelse(is.na(carmidata2$PFL_Counter),NA,carmidata2$Temp)
+carmidata2$DO<-ifelse(is.na(carmidata2$PFL_Counter),NA,carmidata2$DO)
+carmidata2$PC<-ifelse(is.na(carmidata2$PFL_Counter),NA,carmidata2$PC)
+carmidata2$Chl<-ifelse(is.na(carmidata2$PFL_Counter),NA,carmidata2$Chl)
+carmidata<-carmidata2
+
 #Create new dataset with Date, Temp, DO, depth columns.
 CarmiDO <- carmidata[,c(1,6,16,21)]
 #Subset surface and bottom DO measurements
