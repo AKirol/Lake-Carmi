@@ -101,7 +101,6 @@ STAdata$depth <- as.numeric(STAdata$depth)
 STAdata$Chl <- as.numeric(STAdata$Chl)
 STAdata$PC <- as.numeric(STAdata$PC)
 STAdata$Temp <- as.numeric(STAdata$Temp)
-
 #Edit to remove gaps
 STAdata2 <- STAdata %>%
   arrange(Date) %>%
@@ -116,7 +115,6 @@ STAdata2$DO<-ifelse(is.na(STAdata2$PFL_Counter),NA,STAdata2$DO)
 STAdata2$PC<-ifelse(is.na(STAdata2$PFL_Counter),NA,STAdata2$PC)
 STAdata2$Chl<-ifelse(is.na(STAdata2$PFL_Counter),NA,STAdata2$Chl)
 STAdata<-STAdata2
-
 #Create new dataset with Date, Temp, DO, depth columns.
 STA_DO <- STAdata[,c(1,6,16,21)]
 #Subset STA_Surface and STA_Bottom DO measurements
@@ -196,7 +194,6 @@ MBdata$depth <- as.numeric(MBdata$depth)
 MBdata$Chl <- as.numeric(MBdata$Chl)
 MBdata$PC <- as.numeric(MBdata$PC)
 MBdata$Temp <- as.numeric(MBdata$Temp)
-
 #Edit to remove gaps
 MBdata2 <- MBdata %>%
   arrange(Date) %>%
@@ -210,8 +207,8 @@ MBdata2$Temp<-ifelse(is.na(MBdata2$PFL_Counter),NA,MBdata2$Temp)
 MBdata2$DO<-ifelse(is.na(MBdata2$PFL_Counter),NA,MBdata2$DO)
 MBdata2$PC<-ifelse(is.na(MBdata2$PFL_Counter),NA,MBdata2$PC)
 MBdata2$Chl<-ifelse(is.na(MBdata2$PFL_Counter),NA,MBdata2$Chl)
+MBdata2 <- MBdata2[-c(1:18),]
 MBdata<-MBdata2
-
 #Create new dataset with Date, Temp, DO, depth columns.
 MB_DO <- MBdata[,c(1,12,23,15)]
 MB_DO <- MBdata[,c(1,6,16,21)]
@@ -219,7 +216,7 @@ MB_DO <- MBdata[,c(1,6,16,21)]
 MB_DO[3][MB_DO[3]<=0] <- NA
 #Subset MB_Surface and MB_Bottom DO measurements
 MB_Surface <- subset(MB_DO,depth<0.8)
-MB_Bottom <- subset(MB_DO,depth>1.8)
+MB_Bottom <- subset(MB_DO,depth>2.4)
 #Pull data for recent conditions table, rename, format
 MB_mytable <- tail(MB_Surface,1)
 MB_mytable <- MB_mytable[,c(1,2)]
@@ -290,7 +287,6 @@ names(STA_PCPlot2)[3] <- "Data"
 NewSTA_PCPlot<-rbind(NewSTA_PCPlot,STA_PCPlot2)
 NewSTA_PCPlot$PC <- round(NewSTA_PCPlot$PC,digits=2)
 NewSTA_PCPlot$PC <- as.numeric(NewSTA_PCPlot$PC)
-
 STA_ChlPlot<-STA_PCPlot %>% select(Date,Chl) %>% mutate(Chlavg=rollmean(Chl,k=24,fill=NA))
 STA_ChlPlot2<-STA_PCPlot %>% select(Date,Chl,depth)
 STA_ChlPlot2$depth <- "Profiler Measurement"
@@ -301,7 +297,6 @@ names(STA_ChlPlot)[3] <- "Data"
 STA_ChlPlot2<-rbind(STA_ChlPlot2,STA_ChlPlot)
 STA_ChlPlot2$Chl <- round(STA_ChlPlot2$Chl,digits=2)
 STA_ChlPlot2$Chl <- as.numeric(STA_ChlPlot2$Chl)
-
 #GGPlot Setup (DO) Original STA_Surface and STA_Bottom Values Hidden
 #DO <- ggplot(STA_DOPlot, aes(x=Date,y=DO)) + geom_line(aes(col=Depth)) + labs(title="Lake Carmi Dissolved Oxygen", y="DO (mg/L)", x="Date") + scale_y_continuous(breaks=seq(0,16,2), expand = c(0, 0), limits = c(0, 16)) + theme(legend.title=element_blank(), legend.position="STA_Bottom") + scale_color_manual(labels = c("UVM Buoy Site STA_Surface (0.5 meter depth)", "UVM Buoy Site STA_Bottom (8.5 meter depth)"), values=(c("UVM Buoy Site STA_Surface (0.5 meter depth)"="blue", "UVM Buoy Site STA_Bottom (8.5 meter depth)"="red")))
 #ggplotly(DO) %>% layout(legend=list(xanchor="STA_Bottom", yanchor="STA_Bottom",y=0.01,xanchor="left",x=0.01))
@@ -322,15 +317,14 @@ STA_DO2 <- ggplot(STA_DOPlot3,aes(x=Date,y=DO),color=Depth) + geom_line(aes(col=
 STA_Temp <- ggplot(STA_DOPlot3, aes(x=Date,y=Temp),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Saint Albans Bay Water Temperature", y="Temperature (*C)", x="Date") + scale_y_continuous(breaks=seq(5,35,5),limits = c(5,35)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_brewer(palette="Set1") 
 #MB Plot Setup
 #Subset MB_Surface and MB_Bottom DO measurements
-MB_DOPlot <- subset(MB_DO,depth>1.8 | depth<0.8)
-MB_DOPlot$Depth <- ifelse(MB_DOPlot$depth<0.8, "0.5m", "2.0m")
+MB_DOPlot <- subset(MB_DO,depth>2.4 | depth<0.8)
+MB_DOPlot$Depth <- ifelse(MB_DOPlot$depth<0.8, "0.5m", "2.5m")
 #Create new dataset with Date, BGA PC, depth columns.
 MB_PC<-MBdata[,c(1,21,19,15)]
 #Create new dataset with Date, CHLA, BGA PC, depth columns.
 MB_PC<-MBdata[,c(1,18,20,21)]
 #Subset STA_Surface BGA PC measurements
 MB_PCPlot <- subset(MB_PC,depth<0.8)
-
 MB_PCPlot2<-MB_PCPlot %>% select(Date,PC) %>% mutate(PCavg=rollmean(PC,k=24,fill=NA))
 NewMB_PCPlot<-MB_PCPlot%>% select(Date,PC,depth)
 NewMB_PCPlot$depth <- "Profiler Measurement"
@@ -341,7 +335,6 @@ names(MB_PCPlot2)[3] <- "Data"
 NewMB_PCPlot<-rbind(NewMB_PCPlot,MB_PCPlot2)
 NewMB_PCPlot$PC <- round(NewMB_PCPlot$PC,digits=2)
 NewMB_PCPlot$PC <- as.numeric(NewMB_PCPlot$PC)
-
 MB_ChlPlot<-MB_PCPlot %>% select(Date,Chl) %>% mutate(Chlavg=rollmean(Chl,k=24,fill=NA))
 MB_ChlPlot2<-MB_PCPlot %>% select(Date,Chl,depth)
 MB_ChlPlot2$depth <- "Profiler Measurement"
@@ -363,7 +356,7 @@ MB_DOPlot2$Depth <- ifelse(MB_DOPlot2$depth < 0.8, "0.5m",
                         ifelse(MB_DOPlot2$depth>1.8 & MB_DOPlot2$depth<2.3, "2.0m", 
                         ifelse(MB_DOPlot2$depth>2.3 & MB_DOPlot2$depth<2.8, "2.5m", "3.0m")))))
 #Plot of 0.5, 2.0 meters
-MB_DOPlot3 <- subset(MB_DOPlot2,Depth=="0.5m" |Depth=="3.0m")
+MB_DOPlot3 <- subset(MB_DOPlot2,Depth=="0.5m" |Depth=="2.5m")
 MB_DO2 <- ggplot(MB_DOPlot3,aes(x=Date,y=DO),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Missisquoi Bay Dissolved Oxygen", y="Dissolved Oxygen (mg/L)", x="Date", Depth="Legend") + scale_y_continuous(breaks=seq(0,16,2), expand = c(0, 0), limits = c(0, 16)) + scale_color_brewer(palette="Set1")
 #GGPlot Setup (Temp) 
 MB_Temp <- ggplot(MB_DOPlot3, aes(x=Date,y=Temp),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Missisquoi Bay Water Temperature", y="Temperature (*C)", x="Date") + scale_y_continuous(breaks=seq(5,35,5),limits = c(5,35)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_brewer(palette="Set1") 
