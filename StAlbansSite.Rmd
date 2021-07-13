@@ -53,6 +53,9 @@ document.getElementById('cover-spin').style.display = 'block';
 <br>
 <img src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/Missisquoi.png" style="width: 100%;">
 <p style="text-align:right;">Image: Missisquoi Bay, July 2020</p>
+<h2>Recent Lake Conditions</h2>
+<span style="font-size: 10pt;">Updated at 8:30, 12:30, and 16:30 each day</span>
+<br>
 <br>
 ```{r,echo=FALSE, message=FALSE,warning=FALSE}
 #<span style="font-size: 10pt;">Updated at 8:30, 12:30, and 16:30 each day</span>
@@ -119,7 +122,7 @@ STAdata<-STAdata2
 STA_DO <- STAdata[,c(1,6,16,21)]
 #Subset STA_Surface and STA_Bottom DO measurements
 STA_Surface <- subset(STA_DO,depth<0.8)
-STA_Bottom <- subset(STA_DO,depth>3.8)
+STA_Bottom <- subset(STA_DO,depth>4.35)
 #Pull data for recent conditions table, rename, format
 STA_mytable <- tail(STA_Surface,1)
 STA_mytable <- STA_mytable[,c(1,2)]
@@ -270,7 +273,7 @@ Note: click the legend to isolate desired depths for a cleaner look.
 ```{r,echo=FALSE, message=FALSE,warning=FALSE}
 #Plot Setup
 #Subset STA_Surface and STA_Bottom DO measurements
-STA_DOPlot <- subset(STA_DO,depth>3.8 | depth<0.8)
+STA_DOPlot <- subset(STA_DO,depth>4.35 | depth<0.8)
 STA_DOPlot$Depth <- ifelse(STA_DOPlot$depth<0.8, "0.5m", "4.0m")
 #Create new dataset with Date, BGA PC, depth columns.
 STA_PC<-STAdata[,c(1,18,20,21)]
