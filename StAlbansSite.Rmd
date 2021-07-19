@@ -218,7 +218,7 @@ MB_DO <- MBdata[,c(1,6,16,21)]
 #Set DO O's to NA
 MB_DO[3][MB_DO[3]<=0] <- NA
 #Subset MB_Surface and MB_Bottom DO measurements
-MB_Surface <- subset(MB_DO,depth<0.8)
+MB_Surface <- subset(MB_DO,depth<1.4)
 MB_Bottom <- subset(MB_DO,depth>2.4)
 #Pull data for recent conditions table, rename, format
 MB_mytable <- tail(MB_Surface,1)
@@ -321,14 +321,14 @@ STA_DO2 <- ggplot(STA_DOPlot3,aes(x=Date,y=DO),color=Depth) + geom_line(aes(col=
 STA_Temp <- ggplot(STA_DOPlot3, aes(x=Date,y=Temp),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Saint Albans Bay Water Temperature", y="Temperature (*C)", x="Date") + scale_y_continuous(breaks=seq(5,35,5),limits = c(5,35)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_brewer(palette="Set1") 
 #MB Plot Setup
 #Subset MB_Surface and MB_Bottom DO measurements
-MB_DOPlot <- subset(MB_DO,depth>2.4 | depth<0.8)
-MB_DOPlot$Depth <- ifelse(MB_DOPlot$depth<0.8, "0.5m", "2.5m")
+MB_DOPlot <- subset(MB_DO,depth>2.4 | depth<1.4)
+MB_DOPlot$Depth <- ifelse(MB_DOPlot$depth<1.4, "1.0m", "2.5m")
 #Create new dataset with Date, BGA PC, depth columns.
 MB_PC<-MBdata[,c(1,21,19,15)]
 #Create new dataset with Date, CHLA, BGA PC, depth columns.
 MB_PC<-MBdata[,c(1,18,20,21)]
 #Subset STA_Surface BGA PC measurements
-MB_PCPlot <- subset(MB_PC,depth<0.8)
+MB_PCPlot <- subset(MB_PC,depth<1.4 & depth>0.8)
 MB_PCPlot2<-MB_PCPlot %>% select(Date,PC) %>% mutate(PCavg=rollmean(PC,k=24,fill=NA))
 NewMB_PCPlot<-MB_PCPlot%>% select(Date,PC,depth)
 NewMB_PCPlot$depth <- "Profiler Measurement"
@@ -360,7 +360,7 @@ MB_DOPlot2$Depth <- ifelse(MB_DOPlot2$depth < 0.8, "0.5m",
                         ifelse(MB_DOPlot2$depth>1.8 & MB_DOPlot2$depth<2.3, "2.0m", 
                         ifelse(MB_DOPlot2$depth>2.3 & MB_DOPlot2$depth<2.8, "2.5m", "3.0m")))))
 #Plot of 0.5, 2.0 meters
-MB_DOPlot3 <- subset(MB_DOPlot2,Depth=="0.5m" |Depth=="2.5m")
+MB_DOPlot3 <- subset(MB_DOPlot2,Depth=="1.0m" |Depth=="2.5m")
 MB_DO2 <- ggplot(MB_DOPlot3,aes(x=Date,y=DO),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Missisquoi Bay Dissolved Oxygen", y="Dissolved Oxygen (mg/L)", x="Date", Depth="Legend") + scale_y_continuous(breaks=seq(0,16,2), expand = c(0, 0), limits = c(0, 16)) + scale_color_brewer(palette="Set1")
 #GGPlot Setup (Temp) 
 MB_Temp <- ggplot(MB_DOPlot3, aes(x=Date,y=Temp),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Missisquoi Bay Water Temperature", y="Temperature (*C)", x="Date") + scale_y_continuous(breaks=seq(5,35,5),limits = c(5,35)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_brewer(palette="Set1") 
