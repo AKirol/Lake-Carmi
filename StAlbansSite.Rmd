@@ -1,5 +1,5 @@
 ---
-title: "UVM St Albans and Missisqoui Bay Platform Data"
+title: "UVM St Albans and Missisquoi Bay Platform Data"
 output:
   html_document: default
   pdf_document: default
