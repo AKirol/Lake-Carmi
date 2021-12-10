@@ -60,8 +60,6 @@ output:
 document.getElementById('cover-spin').style.display = 'block';
 </script>
 
-<h2>Recent Lake Conditions</h2>
-<span style="font-size: 10pt;">Updated at 8:30, 12:30, and 16:30 each day</span>
 <img align="right" height="320" src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/images/platform.png">
 
 ```{r,echo=FALSE, message=FALSE,warning=FALSE}
@@ -127,6 +125,7 @@ Bottom <- subset(CarmiDO,depth>8.3 & depth<8.9)
 
 ```
 <h4>
+<br>
 <br>
 The UVM live monitoring of Lake Carmi has ended for the 2021 season. Below are plots of the data collected in 2021 and 2020.
 
