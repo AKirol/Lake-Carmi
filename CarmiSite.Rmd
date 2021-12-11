@@ -205,13 +205,13 @@ ggplotly(CTemp) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01
 <p style="background-color:powderblue;">Note: Phycocyanin is a pigment found in cyanobacteria (blue-green algae). Increases in relative fluorescence (RFU) suggest increasing detection of cyanobacteria, but this is not a direct quantitative measurement.There are many caveats associated with using phycocyanin sensors to study cyanobacteria dynamics, but there is general consensus that they are useful for detecting relative changes over time in cyanobacteria biomass at a specific location. Given the propensity of cyanobacteria to concentrate in particular locations in the lake, often due to wind forcing, these point specific sensor data are not necessarily indicative of changes/bloom dynamics across the entire lake at any given time point.</p>
 ```{r, echo=FALSE, message=FALSE}
 #GGPlot Setup (PC)
-PC <- ggplot(NewPCPlot,aes(x=Date,y=PC)) + geom_line(aes(col=Data,alpha=Data),size=0.6) + labs(title="Lake Carmi Blue Green Algae Phycocyanin (~0.5 meters) 2021", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,18,3), limits = c(0, 18))+ theme(legend.title=element_blank(), legend.position="bottom") + scale_color_manual(values=(c("24 Hr Average"="red","Profiler Measurement"="steelblue2")))+scale_alpha_manual(values = c(1, 0.5))
+PC <- ggplot(NewPCPlot,aes(x=Date,y=PC)) + geom_line(aes(col=Data,alpha=Data),size=0.6) + labs(title="Lake Carmi Blue Green Algae Phycocyanin (~0.5 meters) 2021", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,12,3), limits = c(0, 12))+ theme(legend.title=element_blank(), legend.position="bottom") + scale_color_manual(values=(c("24 Hr Average"="red","Profiler Measurement"="steelblue2")))+scale_alpha_manual(values = c(1, 0.5))
 ggplotly(PC) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
 ```
 
 ```{r, echo=FALSE, message=FALSE}
 #GGPlot Setup (Chl)
-Chl <- ggplot(ChlPlot,aes(x=Date,y=Chl)) + geom_line(aes(col=Data,alpha=Data),size=0.6) + labs(title="Lake Carmi Chlorophyll (~0.5 meters) 2021", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,40,5), limits = c(0, 40))+ theme(legend.title=element_blank(), legend.position="bottom") + scale_color_manual(values=(c("24 Hr Average"="red","Profiler Measurement"="steelblue2")))+scale_alpha_manual(values = c(1, 0.5))
+Chl <- ggplot(ChlPlot,aes(x=Date,y=Chl)) + geom_line(aes(col=Data,alpha=Data),size=0.6) + labs(title="Lake Carmi Chlorophyll (~0.5 meters) 2021", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,20,5), limits = c(0, 20))+ theme(legend.title=element_blank(), legend.position="bottom") + scale_color_manual(values=(c("24 Hr Average"="red","Profiler Measurement"="steelblue2")))+scale_alpha_manual(values = c(1, 0.5))
 ggplotly(Chl) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
 ```
 
@@ -324,13 +324,13 @@ ggplotly(CTemp) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01
 <p style="background-color:powderblue;">Note: Phycocyanin is a pigment found in cyanobacteria (blue-green algae). Increases in relative fluorescence (RFU) suggest increasing detection of cyanobacteria, but this is not a direct quantitative measurement.There are many caveats associated with using phycocyanin sensors to study cyanobacteria dynamics, but there is general consensus that they are useful for detecting relative changes over time in cyanobacteria biomass at a specific location. Given the propensity of cyanobacteria to concentrate in particular locations in the lake, often due to wind forcing, these point specific sensor data are not necessarily indicative of changes/bloom dynamics across the entire lake at any given time point.</p>
 ```{r, echo=FALSE, message=FALSE}
 #GGPlot Setup (PC)
-PC <- ggplot(NewPCPlot,aes(x=Date,y=PC)) + geom_line(aes(col=Data,alpha=Data),size=0.6) + labs(title="Lake Carmi Blue Green Algae Phycocyanin (~0.5 meters) 2020", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,18,3), limits = c(0, 18))+ theme(legend.title=element_blank(), legend.position="bottom") + scale_color_manual(values=(c("24 Hr Average"="red","Profiler Measurement"="steelblue2")))+scale_alpha_manual(values = c(1, 0.5))
+PC <- ggplot(NewPCPlot,aes(x=Date,y=PC)) + geom_line(aes(col=Data,alpha=Data),size=0.6) + labs(title="Lake Carmi Blue Green Algae Phycocyanin (~0.5 meters) 2020", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,12,3), limits = c(0, 12))+ theme(legend.title=element_blank(), legend.position="bottom") + scale_color_manual(values=(c("24 Hr Average"="red","Profiler Measurement"="steelblue2")))+scale_alpha_manual(values = c(1, 0.5))
 ggplotly(PC) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
 ```
 
 ```{r, echo=FALSE, message=FALSE}
 #GGPlot Setup (Chl)
-Chl <- ggplot(ChlPlot,aes(x=Date,y=Chl)) + geom_line(aes(col=Data,alpha=Data),size=0.6) + labs(title="Lake Carmi Chlorophyll (~0.5 meters) 2020", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,40,5), limits = c(0, 40))+ theme(legend.title=element_blank(), legend.position="bottom") + scale_color_manual(values=(c("24 Hr Average"="red","Profiler Measurement"="steelblue2")))+scale_alpha_manual(values = c(1, 0.5))
+Chl <- ggplot(ChlPlot,aes(x=Date,y=Chl)) + geom_line(aes(col=Data,alpha=Data),size=0.6) + labs(title="Lake Carmi Chlorophyll (~0.5 meters) 2020", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,20,5), limits = c(0, 20))+ theme(legend.title=element_blank(), legend.position="bottom") + scale_color_manual(values=(c("24 Hr Average"="red","Profiler Measurement"="steelblue2")))+scale_alpha_manual(values = c(1, 0.5))
 ggplotly(Chl) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
 ```
 
