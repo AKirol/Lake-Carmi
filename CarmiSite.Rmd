@@ -504,7 +504,10 @@ ggplotly(Chl) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,x
 
 <p style="text-align:center">Please contact us at ashton.kirol@uvm.edu.com and andrew.schroth@uvm.edu with any questions or comments.</p>
 
-<table style="width: 80%; border: 0px; margin-left:auto; margin-right:auto"><tr><td><img src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/images/NSF.png" style="width: 300px"></td><td style="vertical-align: middle">These data and infrastructure are also sourced in research support provided to Andrew Schroth by the National Science Foundation under under VT EPSCoR Grant No. NSF OIA-1556770 and EAR-1561014. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation.</td></tr></table>
+<table style="width: 80%; border: 0px; margin-left:auto; margin-right:auto"><tr><td><img src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/images/NSF.png" style="width: 300px;padding: 5px 5px 5px 5px"></td><td style="vertical-align: middle">These data and infrastructure are also sourced in research support provided to Andrew Schroth by the National Science Foundation under under VT EPSCoR Grant No. NSF OIA-1556770 and EAR-1561014. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation.</td></tr></table>
+<br>
+
+<table style="width: 80%; border: 0px; margin-left:auto; margin-right:auto"><tr><td><img src="https://github.com/AKirol/Lake-Carmi/blob/master/USGS-LOGO.png?raw=true" style="width: 300px;padding: 5px 5px 5px 5px"></td><td style="vertical-align: middle">This material is based upon work supported by the Vermont Water Center via the U.S. Geological Survey under Grant G21AP10630. The views and conclusions contained in this document are those of the authors and should not be interpreted as representing the opinions or policies of the U.S. Geological Survey. Mention of trade names or commercial products does not constitute their endorsement by the U.S. Geological Survey.</td></tr></table>
 <br>
 
 <script>
