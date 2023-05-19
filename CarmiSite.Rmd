@@ -83,7 +83,7 @@ carmidataTEMP$Date1 <- strptime(carmidataTEMP$TIMESTAMP, "%Y-%m-%d %H:%M:%S")
 carmidataTEMP$Date1<- as.POSIXct(carmidataTEMP$Date1)
 carmidataTEMP$Year <- carmidataTEMP$Date1
 carmidataTEMP$Year <- format(carmidataTEMP$Year, format="%Y")
-carmidata <- subset(carmidataTEMP, Year==2022)
+carmidata <- subset(carmidataTEMP, Year==2023)
 meturl = "http://epscor.uvm.edu/LakeCarmi/CarmiData-LatestMetData.csv"
 carmimet <- read.csv(url(meturl), stringsAsFactors = F)
 #mettable <- carmimet[,c(3,4,9)]
@@ -173,6 +173,7 @@ kable(mytable, align='r') %>% kable_styling(bootstrap_options = c("striped", "ho
                 font_size = 12,
                 position = "left")
 ```
+
 <h4>The collection of these data and the larger Lake Carmi research project are primarily supported by Vermont Department of Environmental Conservation under the Clean Water Initiative, and conducted in collaboration with the Vermont DEC's Lakes and Ponds Program.</h4>
 <br>
 
@@ -181,7 +182,9 @@ kable(mytable, align='r') %>% kable_styling(bootstrap_options = c("striped", "ho
 Note: Click the tabs to view data from a previous season. <br>
 \   \   Click the legend to remove depths from a plot for a cleaner look.
 
-### 2022
+
+### 2023
+
 ```{r, echo=FALSE, message=FALSE}
 #Plot Setup
 #Subset surface and bottom DO measurements
@@ -242,9 +245,11 @@ ggplotly(DO2) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,x
 CTemp <- ggplot(DOPlot, aes(x=Date,y=Temp)) + geom_line(aes(col=Depth)) + labs(title="Lake Carmi Water Temperature", y="Temperature (*C)", x="Date") + scale_y_continuous(breaks=seq(0,40,2)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_brewer(palette="Set1") 
 ggplotly(CTemp) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
 ```
+
 <br>
 <h2>Biological Activity Plots</h2>
 <p style="background-color:powderblue;">Note: Phycocyanin is a pigment found in cyanobacteria (blue-green algae). Increases in relative fluorescence (RFU) suggest increasing detection of cyanobacteria, but this is not a direct quantitative measurement.There are many caveats associated with using phycocyanin sensors to study cyanobacteria dynamics, but there is general consensus that they are useful for detecting relative changes over time in cyanobacteria biomass at a specific location. Given the propensity of cyanobacteria to concentrate in particular locations in the lake, often due to wind forcing, these point specific sensor data are not necessarily indicative of changes/bloom dynamics across the entire lake at any given time point.</p>
+
 ```{r, echo=FALSE, message=FALSE}
 #GGPlot Setup (PC)
 PC <- ggplot(NewPCPlot,aes(x=Date,y=PC)) + geom_line(aes(col=Data,alpha=Data),size=0.6) + labs(title="Lake Carmi Blue Green Algae Phycocyanin (~0.5 meters)", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,8,2), limits = c(0, 8))+ theme(legend.title=element_blank(), legend.position="bottom") + scale_color_manual(values=(c("24 Hr Average"="red","Profiler Measurement"="steelblue2")))+scale_alpha_manual(values = c(1, 0.5))
@@ -258,7 +263,132 @@ ggplotly(Chl) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,x
 ```
 
 
+### 2022
+```{r, echo=FALSE, message=FALSE}
+carmidata <- subset(carmidataTEMP, Year==2022)
+meturl = "http://epscor.uvm.edu/LakeCarmi/CarmiData-LatestMetData.csv"
+carmimet <- read.csv(url(meturl), stringsAsFactors = F)
+#mettable <- carmimet[,c(3,4,9)]
+mettable <- carmimet
+#Rename columns to be used
+names(carmidata)[1] <- "Date"
+names(carmidata)[6] <- "Temp"
+names(carmidata)[16] <- "DO"
+names(carmidata)[18] <- "Chl"
+names(carmidata)[20] <- "PC"
+names(carmidata)[21] <- "depth"
+#Remove rows without data.
+# carmidata <- subset(carmidata, Date !="TIMESTAMP" & Date !="TS")
+# carmidata <- subset(carmidata, CR1000 !="Smp")
+#Format date column
+carmidata$Date <- strptime(carmidata$Date, "%Y-%m-%d %H:%M:%S")
+carmidata$Date<- as.POSIXct(carmidata$Date)
+#Format columns as numeric
+carmidata$DO <- as.numeric(carmidata$DO)
+carmidata$depth <- as.numeric(carmidata$depth)
+carmidata$Chl <- as.numeric(carmidata$Chl)
+carmidata$PC <- as.numeric(carmidata$PC)
+carmidata$Temp <- as.numeric(carmidata$Temp)
+#Edit to remove gaps
+carmidata2 <- carmidata %>%
+  arrange(Date) %>%
+  mutate(date.diff = c(NA, diff(Date))) %>%
+  mutate(is.gap = !is.na(date.diff) & date.diff > median(date.diff, na.rm = TRUE)) %>%
+  mutate(period.id = cumsum(is.gap))
+carmidata2$date.diff <- as.numeric(carmidata2$date.diff)
+carmidata2$Gap<-ifelse(carmidata2$date.diff>=5000 | is.na(carmidata2$date.diff),carmidata2$PFL_Counter,NA)
+carmidata2$PFL_Counter <- ifelse(carmidata2$PFL_Counter%in%carmidata2$Gap,NA,carmidata2$PFL_Counter)
+carmidata2$Temp<-ifelse(is.na(carmidata2$PFL_Counter),NA,carmidata2$Temp)
+carmidata2$DO<-ifelse(is.na(carmidata2$PFL_Counter),NA,carmidata2$DO)
+carmidata2$PC<-ifelse(is.na(carmidata2$PFL_Counter),NA,carmidata2$PC)
+carmidata2$Chl<-ifelse(is.na(carmidata2$PFL_Counter),NA,carmidata2$Chl)
+carmidata<-carmidata2
+#Create new dataset with Date, Temp, DO, depth columns.
+CarmiDO <- carmidata[,c(1,6,16,21)]
+#Subset surface and bottom DO measurements
+Surface <- subset(CarmiDO,depth<0.8)
+Bottom <- subset(CarmiDO,depth>8.3 & depth<8.9)
+```
+
+```{r, echo=FALSE, message=FALSE}
+#Plot Setup
+#Subset surface and bottom DO measurements
+DOPlot <- subset(CarmiDO,depth>8.9 | depth<0.8)
+DOPlot$Depth <- ifelse(DOPlot$depth<5, "UVM Buoy Site Surface (0.5 meter depth)", "UVM Buoy Site Bottom (9.0 meter depth)")
+#Create new dataset with Date, BGA PC, depth columns.
+CarmiPC<-carmidata[,c(1,18,20,21)]
+#Subset surface BGA PC measurements
+PCPlot <- subset(CarmiPC,depth<0.8)
+PCPlot2<-PCPlot %>% select(Date,PC) %>% mutate(PCavg=rollmean(PC,k=24,fill=NA))
+NewPCPlot<-PCPlot%>% select(Date,PC,depth)
+NewPCPlot$depth <- "Profiler Measurement"
+names(NewPCPlot)[3] <- "Data"
+PCPlot2$PC <- PCPlot2$PCavg
+PCPlot2$PCavg <- "24 Hr Average"
+names(PCPlot2)[3] <- "Data"
+NewPCPlot<-rbind(NewPCPlot,PCPlot2)
+NewPCPlot$PC <- round(NewPCPlot$PC,digits=2)
+NewPCPlot$PC <- as.numeric(NewPCPlot$PC)
+ChlPlot<-PCPlot %>% select(Date,Chl) %>% mutate(Chlavg=rollmean(Chl,k=24,fill=NA))
+ChlPlot2<-PCPlot%>% select(Date,Chl,depth)
+ChlPlot2$depth <- "Profiler Measurement"
+names(ChlPlot2)[3] <- "Data"
+ChlPlot$Chl <- ChlPlot$Chlavg
+ChlPlot$Chlavg <- "24 Hr Average"
+names(ChlPlot)[3] <- "Data"
+ChlPlot<-rbind(ChlPlot,ChlPlot2)
+ChlPlot$Chl <- round(ChlPlot$Chl,digits=2)
+ChlPlot$Chl <- as.numeric(ChlPlot$Chl)
+#GGPlot Setup (DO) Original Surface and Bottom Values Hidden
+#DO <- ggplot(DOPlot, aes(x=Date,y=DO)) + geom_line(aes(col=Depth)) + labs(title="Lake Carmi Dissolved Oxygen", y="DO (mg/L)", x="Date") + scale_y_continuous(breaks=seq(0,16,2), expand = c(0, 0), limits = c(0, 16)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_manual(labels = c("UVM Buoy Site Surface (0.5 meter depth)", "UVM Buoy Site Bottom (8.5 meter depth)"), values=(c("UVM Buoy Site Surface (0.5 meter depth)"="blue", "UVM Buoy Site Bottom (8.5 meter depth)"="red")))
+#ggplotly(DO) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
+#Full DO Profile Setup
+DOPlot2 <-CarmiDO
+DOPlot2$Depth <- ifelse(DOPlot2$depth < 0.8, "0.5m",
+                        ifelse(DOPlot2$depth>0.8 & DOPlot2$depth<1.5, "1.0m",
+                        ifelse(DOPlot2$depth>1.5 & DOPlot2$depth<1.8, "1.5m",
+                        ifelse(DOPlot2$depth>1.8 & DOPlot2$depth<2.4, "2.0m", 
+                        ifelse(DOPlot2$depth>2.4 & DOPlot2$depth<3.0, "2.5m",
+                        ifelse(DOPlot2$depth>3.0 & DOPlot2$depth<3.4, "3.0m",
+                        ifelse(DOPlot2$depth>3.4 & DOPlot2$depth<3.9, "3.5m",
+                        ifelse(DOPlot2$depth>3.9 & DOPlot2$depth<4.4, "4.0m",
+                        ifelse(DOPlot2$depth>4.4 & DOPlot2$depth<4.8, "4.5m",
+                        ifelse(DOPlot2$depth>4.8 & DOPlot2$depth<5.4, "5.0m",
+                        ifelse(DOPlot2$depth>5.4 & DOPlot2$depth<5.9, "5.5m",
+                        ifelse(DOPlot2$depth>5.9 & DOPlot2$depth<6.4, "6.0m",
+                        ifelse(DOPlot2$depth>6.4 & DOPlot2$depth<6.9, "6.5m",
+                        ifelse(DOPlot2$depth>6.9 & DOPlot2$depth<7.4, "7.0m",
+                        ifelse(DOPlot2$depth>7.4 & DOPlot2$depth<7.9, "7.5m",
+                        ifelse(DOPlot2$depth>7.9 & DOPlot2$depth<8.4, "8.0m",
+                        ifelse(DOPlot2$depth>8.4 & DOPlot2$depth<8.9, "8.5m",
+                               "9.0m")))))))))))))))))
+#Plot of 0.5, 5.0, 8.0, 8.5 meters
+DOPlot3 <- subset(DOPlot2,Depth=="0.5m" |Depth=="5.0m" |Depth=="7.5m" | Depth=="8.0m" | Depth=="8.5m" | Depth=="9.0m")
+DO2 <- ggplot(DOPlot3,aes(x=Date,y=DO),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Lake Carmi Dissolved Oxygen", y="Dissolved Oxygen (mg/L)", x="Date", Depth="Legend") + scale_y_continuous(breaks=seq(0,16,2), expand = c(0, 0), limits = c(0, 16)) + scale_color_brewer(palette="Paired")
+ggplotly(DO2) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
+#GGPlot Setup (Temp) 
+CTemp <- ggplot(DOPlot, aes(x=Date,y=Temp)) + geom_line(aes(col=Depth)) + labs(title="Lake Carmi Water Temperature", y="Temperature (*C)", x="Date") + scale_y_continuous(breaks=seq(0,40,2)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_brewer(palette="Set1") 
+ggplotly(CTemp) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
+```
+
+<br>
+<h2>Biological Activity Plots</h2>
+<p style="background-color:powderblue;">Note: Phycocyanin is a pigment found in cyanobacteria (blue-green algae). Increases in relative fluorescence (RFU) suggest increasing detection of cyanobacteria, but this is not a direct quantitative measurement.There are many caveats associated with using phycocyanin sensors to study cyanobacteria dynamics, but there is general consensus that they are useful for detecting relative changes over time in cyanobacteria biomass at a specific location. Given the propensity of cyanobacteria to concentrate in particular locations in the lake, often due to wind forcing, these point specific sensor data are not necessarily indicative of changes/bloom dynamics across the entire lake at any given time point.</p>
+
+```{r, echo=FALSE, message=FALSE}
+#GGPlot Setup (PC)
+PC <- ggplot(NewPCPlot,aes(x=Date,y=PC)) + geom_line(aes(col=Data,alpha=Data),size=0.6) + labs(title="Lake Carmi Blue Green Algae Phycocyanin (~0.5 meters)", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,8,2), limits = c(0, 8))+ theme(legend.title=element_blank(), legend.position="bottom") + scale_color_manual(values=(c("24 Hr Average"="red","Profiler Measurement"="steelblue2")))+scale_alpha_manual(values = c(1, 0.5))
+ggplotly(PC) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
+```
+
+```{r, echo=FALSE, message=FALSE}
+#GGPlot Setup (Chl)
+Chl <- ggplot(ChlPlot,aes(x=Date,y=Chl)) + geom_line(aes(col=Data,alpha=Data),size=0.6) + labs(title="Lake Carmi Chlorophyll (~0.5 meters)", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,20,5), limits = c(0, 20))+ theme(legend.title=element_blank(), legend.position="bottom") + scale_color_manual(values=(c("24 Hr Average"="red","Profiler Measurement"="steelblue2")))+scale_alpha_manual(values = c(1, 0.5))
+ggplotly(Chl) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
+```
+
 ### 2021
+
 ```{r, echo=FALSE, message=FALSE}
 carmidata <- subset(carmidataTEMP, Year==2021)
 meturl = "http://epscor.uvm.edu/LakeCarmi/CarmiData-LatestMetData.csv"
@@ -365,9 +495,11 @@ ggplotly(DO2) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,x
 CTemp <- ggplot(DOPlot, aes(x=Date,y=Temp)) + geom_line(aes(col=Depth)) + labs(title="Lake Carmi Water Temperature", y="Temperature (*C)", x="Date") + scale_y_continuous(breaks=seq(0,40,2)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_brewer(palette="Set1") 
 ggplotly(CTemp) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
 ```
+
 <br>
 <h2>Biological Activity Plots</h2>
 <p style="background-color:powderblue;">Note: Phycocyanin is a pigment found in cyanobacteria (blue-green algae). Increases in relative fluorescence (RFU) suggest increasing detection of cyanobacteria, but this is not a direct quantitative measurement.There are many caveats associated with using phycocyanin sensors to study cyanobacteria dynamics, but there is general consensus that they are useful for detecting relative changes over time in cyanobacteria biomass at a specific location. Given the propensity of cyanobacteria to concentrate in particular locations in the lake, often due to wind forcing, these point specific sensor data are not necessarily indicative of changes/bloom dynamics across the entire lake at any given time point.</p>
+
 ```{r, echo=FALSE, message=FALSE}
 #GGPlot Setup (PC)
 PC <- ggplot(NewPCPlot,aes(x=Date,y=PC)) + geom_line(aes(col=Data,alpha=Data),size=0.6) + labs(title="Lake Carmi Blue Green Algae Phycocyanin (~0.5 meters)", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,18,3), limits = c(0, 18))+ theme(legend.title=element_blank(), legend.position="bottom") + scale_color_manual(values=(c("24 Hr Average"="red","Profiler Measurement"="steelblue2")))+scale_alpha_manual(values = c(1, 0.5))
@@ -380,10 +512,10 @@ Chl <- ggplot(ChlPlot,aes(x=Date,y=Chl)) + geom_line(aes(col=Data,alpha=Data),si
 ggplotly(Chl) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
 ```
 
-
-
 ### 2020
-*Note: 8.5 meters was the bottom sensor depth in 2020 due to water level (compared to 9 meters in 2021)
+
+\*Note: 8.5 meters was the bottom sensor depth in 2020 due to water level (compared to 9 meters in 2021)
+
 ```{r, echo=FALSE, message=FALSE}
 carmidata <- subset(carmidataTEMP, Year==2020)
 #Rename columns to be used
@@ -485,9 +617,11 @@ ggplotly(DO2) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,x
 CTemp <- ggplot(DOPlot, aes(x=Date,y=Temp)) + geom_line(aes(col=Depth)) + labs(title="Lake Carmi Water Temperature 2020", y="Temperature (*C)", x="Date") + scale_y_continuous(breaks=seq(0,40,2)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_brewer(palette="Set1") 
 ggplotly(CTemp) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
 ```
+
 <br>
 <h2>Biological Activity Plots</h2>
 <p style="background-color:powderblue;">Note: Phycocyanin is a pigment found in cyanobacteria (blue-green algae). Increases in relative fluorescence (RFU) suggest increasing detection of cyanobacteria, but this is not a direct quantitative measurement.There are many caveats associated with using phycocyanin sensors to study cyanobacteria dynamics, but there is general consensus that they are useful for detecting relative changes over time in cyanobacteria biomass at a specific location. Given the propensity of cyanobacteria to concentrate in particular locations in the lake, often due to wind forcing, these point specific sensor data are not necessarily indicative of changes/bloom dynamics across the entire lake at any given time point.</p>
+
 ```{r, echo=FALSE, message=FALSE}
 #GGPlot Setup (PC)
 PC <- ggplot(NewPCPlot,aes(x=Date,y=PC)) + geom_line(aes(col=Data,alpha=Data),size=0.6) + labs(title="Lake Carmi Blue Green Algae Phycocyanin (~0.5 meters) 2020", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(0,12,3), limits = c(0, 12))+ theme(legend.title=element_blank(), legend.position="bottom") + scale_color_manual(values=(c("24 Hr Average"="red","Profiler Measurement"="steelblue2")))+scale_alpha_manual(values = c(1, 0.5))
