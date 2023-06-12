@@ -1,18 +1,12 @@
 ---
-title: "UVM St Albans and Missisquoi Bay Platform Data"
+title: "UVM St Albans and Missisqoui Bay Platform Data"
 output:
   html_document: default
 ---
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-178011310-1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'UA-178011310-1');
-</script>
+
 <!--Spinner code below from:
   http://www.menucool.com/9499/CSS-loading-spinner-with-a-semi-transparent-background-->
+
 <style>
 #cover-spin {
     position:fixed;
@@ -22,14 +16,17 @@ output:
     z-index:9999;
     display:none;
 }
+
 @-webkit-keyframes spin {
   from {-webkit-transform:rotate(0deg);}
   to {-webkit-transform:rotate(360deg);}
 }
+
 @keyframes spin {
   from {transform:rotate(0deg);}
   to {transform:rotate(360deg);}
 }
+
 #cover-spin::after {
     content:'';
     display:block;
@@ -45,39 +42,37 @@ output:
     animation: spin .8s linear infinite;
 }
 </style>
+
 <div id="cover-spin"></div>
+
 <script>
 document.getElementById('cover-spin').style.display = 'block';
 </script>
-<br>
+
 <img src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/Missisquoi.png" style="width: 100%;">
 <p style="text-align:right;">Image: Missisquoi Bay, July 2020</p>
-<h2>Recent Lake Conditions</h2>
-<span style="font-size: 10pt;">Updated at 8:30, 12:30, and 16:30 each day</span>
 <br>
-<br>
+
+
 ```{r,echo=FALSE, message=FALSE,warning=FALSE}
 #<span style="font-size: 10pt;">Updated at 8:30, 12:30, and 16:30 each day</span>
 #<img align="right" height="320" src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/images/platform.png">
 #Code to pull csv data, create current condition table:
 #Install + load ggplot2, htmlwidgets, knitr, devtools, plotly, kableExtra
 library(ggplot2)
+library(gridExtra)
 library(htmlwidgets)
 library(knitr)
 library(devtools)
 library(plotly) 
 library(kableExtra)
-library(lubridate)
-library(fpp2)
-library(zoo)
-library(dplyr)
 STAurlfile = "http://epscor.uvm.edu/StAlbans/STAData-LatestPFLData.csv"
 STAmeturl = "http://epscor.uvm.edu/StAlbans/STAData-LatestMetData.csv"
 MBurlfile = "http://epscor.uvm.edu/StAlbans/MBData-LatestPFLData.csv"
 MBmeturl = "http://epscor.uvm.edu/StAlbans/MBData-LatestMetData.csv"
+## Ashton... Start editing names here...
 STAdata <- read.csv(url(STAurlfile), skip=1)
 STAmet <- read.csv(url(STAmeturl), stringsAsFactors = F)
-STAmet <- na.omit(STAmet)
 #STAmettable <- STAmet[,c(3,4,9)]
 STAmettable <- STAmet
 #Rename columns to be used
@@ -93,35 +88,17 @@ names(STAdata)[21] <- "depth" #set
 #Format date column
 STAdata$Date <- strptime(STAdata$Date, "%Y-%m-%d %H:%M:%S")
 STAdata$Date<- as.POSIXct(STAdata$Date)
-#Add Year column and select for current year
-STAdata$Year <- STAdata$Date
-STAdata$Year <- format(STAdata$Year, format="%Y")
-STAdata<-subset(STAdata, Year=="2021")
 #Format columns as numeric
 STAdata$DO <- as.numeric(STAdata$DO)
 STAdata$depth <- as.numeric(STAdata$depth)
 STAdata$Chl <- as.numeric(STAdata$Chl)
 STAdata$PC <- as.numeric(STAdata$PC)
 STAdata$Temp <- as.numeric(STAdata$Temp)
-#Edit to remove gaps
-STAdata2 <- STAdata %>%
-  arrange(Date) %>%
-  mutate(date.diff = c(NA, diff(Date))) %>%
-  mutate(is.gap = !is.na(date.diff) & date.diff > median(date.diff, na.rm = TRUE)) %>%
-  mutate(period.id = cumsum(is.gap))
-STAdata2$date.diff <- as.numeric(STAdata2$date.diff)
-STAdata2$Gap<-ifelse(STAdata2$date.diff>=5000 | is.na(STAdata2$date.diff),STAdata2$PFL_Counter,NA)
-STAdata2$PFL_Counter <- ifelse(STAdata2$PFL_Counter%in%STAdata2$Gap,NA,STAdata2$PFL_Counter)
-STAdata2$Temp<-ifelse(is.na(STAdata2$PFL_Counter),NA,STAdata2$Temp)
-STAdata2$DO<-ifelse(is.na(STAdata2$PFL_Counter),NA,STAdata2$DO)
-STAdata2$PC<-ifelse(is.na(STAdata2$PFL_Counter),NA,STAdata2$PC)
-STAdata2$Chl<-ifelse(is.na(STAdata2$PFL_Counter),NA,STAdata2$Chl)
-STAdata<-STAdata2
 #Create new dataset with Date, Temp, DO, depth columns.
 STA_DO <- STAdata[,c(1,6,16,21)]
 #Subset STA_Surface and STA_Bottom DO measurements
 STA_Surface <- subset(STA_DO,depth<0.8)
-STA_Bottom <- subset(STA_DO,depth>4.35)
+STA_Bottom <- subset(STA_DO,depth>3.8)
 #Pull data for recent conditions table, rename, format
 STA_mytable <- tail(STA_Surface,1)
 STA_mytable <- STA_mytable[,c(1,2)]
@@ -175,50 +152,28 @@ MBmet <- read.csv(url(MBmeturl), stringsAsFactors = F)
 MBmettable <- MBmet
 #Rename columns to be used
 names(MBdata)[1] <- "Date" #set
-names(MBdata)[6] <- "Temp" #set
-names(MBdata)[16] <- "DO" #set
-names(MBdata)[18] <- "Chl" #Need Column
-names(MBdata)[20] <- "PC" #Need Column
-names(MBdata)[21] <- "depth" #set
+names(MBdata)[12] <- "Temp" #set
+names(MBdata)[23] <- "DO" #set
+names(MBdata)[21] <- "Chl" #Need Column
+names(MBdata)[19] <- "PC" #Need Column
+names(MBdata)[15] <- "depth" #set
 #Remove rows without data.
 # MBdata <- subset(MBdata, Date !="TIMESTAMP" & Date !="TS")
 # MBdata <- subset(MBdata, CR1000 !="Smp")
 #Format date column
 MBdata$Date <- strptime(MBdata$Date, "%Y-%m-%d %H:%M:%S")
 MBdata$Date<- as.POSIXct(MBdata$Date)
-#Add Year column and select for current year
-MBdata$Year <- MBdata$Date
-MBdata$Year <- format(MBdata$Year, format="%Y")
-MBdata<-subset(MBdata, Year=="2021")
 #Format columns as numeric
 MBdata$DO <- as.numeric(MBdata$DO)
 MBdata$depth <- as.numeric(MBdata$depth)
 MBdata$Chl <- as.numeric(MBdata$Chl)
 MBdata$PC <- as.numeric(MBdata$PC)
 MBdata$Temp <- as.numeric(MBdata$Temp)
-#Edit to remove gaps
-MBdata2 <- MBdata %>%
-  arrange(Date) %>%
-  mutate(date.diff = c(NA, diff(Date))) %>%
-  mutate(is.gap = !is.na(date.diff) & date.diff > median(date.diff, na.rm = TRUE)) %>%
-  mutate(period.id = cumsum(is.gap))
-MBdata2$date.diff <- as.numeric(MBdata2$date.diff)
-MBdata2$Gap<-ifelse(MBdata2$date.diff>=5000 | is.na(MBdata2$date.diff),MBdata2$PFL_Counter,NA)
-MBdata2$PFL_Counter <- ifelse(MBdata2$PFL_Counter%in%MBdata2$Gap,NA,MBdata2$PFL_Counter)
-MBdata2$Temp<-ifelse(is.na(MBdata2$PFL_Counter),NA,MBdata2$Temp)
-MBdata2$DO<-ifelse(is.na(MBdata2$PFL_Counter),NA,MBdata2$DO)
-MBdata2$PC<-ifelse(is.na(MBdata2$PFL_Counter),NA,MBdata2$PC)
-MBdata2$Chl<-ifelse(is.na(MBdata2$PFL_Counter),NA,MBdata2$Chl)
-MBdata2 <- MBdata2[-c(1:18),]
-MBdata<-MBdata2
 #Create new dataset with Date, Temp, DO, depth columns.
 MB_DO <- MBdata[,c(1,12,23,15)]
-MB_DO <- MBdata[,c(1,6,16,21)]
-#Set DO O's to NA
-MB_DO[3][MB_DO[3]<=0] <- NA
 #Subset MB_Surface and MB_Bottom DO measurements
-MB_Surface <- subset(MB_DO,depth<1.4)
-MB_Bottom <- subset(MB_DO,depth>2.4)
+MB_Surface <- subset(MB_DO,depth<0.8)
+MB_Bottom <- subset(MB_DO,depth>1.8)
 #Pull data for recent conditions table, rename, format
 MB_mytable <- tail(MB_Surface,1)
 MB_mytable <- MB_mytable[,c(1,2)]
@@ -266,39 +221,21 @@ kable(MB_mytable, align='r',caption="Missisquoi Bay") %>% kable_styling(bootstra
                 font_size = 12,
                 position = "right")
 ```
-   
-<h2>2021 Lake Condition Plots</h2>
+
+
+ 
+<h2>Lake Condition Plots</h2>
 Note: click the legend to isolate desired depths for a cleaner look.
+
 ```{r,echo=FALSE, message=FALSE,warning=FALSE}
 #Plot Setup
 #Subset STA_Surface and STA_Bottom DO measurements
-STA_DOPlot <- subset(STA_DO,depth>4.35 | depth<0.8)
+STA_DOPlot <- subset(STA_DO,depth>3.8 | depth<0.8)
 STA_DOPlot$Depth <- ifelse(STA_DOPlot$depth<0.8, "0.5m", "4.0m")
 #Create new dataset with Date, BGA PC, depth columns.
 STA_PC<-STAdata[,c(1,18,20,21)]
 #Subset STA_Surface BGA PC measurements
 STA_PCPlot <- subset(STA_PC,depth<0.8)
-#24 hr average for biological pigments
-STA_PCPlot2<-STA_PCPlot %>% select(Date,PC) %>% mutate(PCavg=rollmean(PC,k=24,fill=NA))
-NewSTA_PCPlot<-STA_PCPlot%>% select(Date,PC,depth)
-NewSTA_PCPlot$depth <- "Profiler Measurement"
-names(NewSTA_PCPlot)[3] <- "Data"
-STA_PCPlot2$PC <- STA_PCPlot2$PCavg
-STA_PCPlot2$PCavg <- "24 Hr Average"
-names(STA_PCPlot2)[3] <- "Data"
-NewSTA_PCPlot<-rbind(NewSTA_PCPlot,STA_PCPlot2)
-NewSTA_PCPlot$PC <- round(NewSTA_PCPlot$PC,digits=2)
-NewSTA_PCPlot$PC <- as.numeric(NewSTA_PCPlot$PC)
-STA_ChlPlot<-STA_PCPlot %>% select(Date,Chl) %>% mutate(Chlavg=rollmean(Chl,k=24,fill=NA))
-STA_ChlPlot2<-STA_PCPlot %>% select(Date,Chl,depth)
-STA_ChlPlot2$depth <- "Profiler Measurement"
-names(STA_ChlPlot2)[3] <- "Data"
-STA_ChlPlot$Chl <- STA_ChlPlot$Chlavg
-STA_ChlPlot$Chlavg <- "24 Hr Average"
-names(STA_ChlPlot)[3] <- "Data"
-STA_ChlPlot2<-rbind(STA_ChlPlot2,STA_ChlPlot)
-STA_ChlPlot2$Chl <- round(STA_ChlPlot2$Chl,digits=2)
-STA_ChlPlot2$Chl <- as.numeric(STA_ChlPlot2$Chl)
 #GGPlot Setup (DO) Original STA_Surface and STA_Bottom Values Hidden
 #DO <- ggplot(STA_DOPlot, aes(x=Date,y=DO)) + geom_line(aes(col=Depth)) + labs(title="Lake Carmi Dissolved Oxygen", y="DO (mg/L)", x="Date") + scale_y_continuous(breaks=seq(0,16,2), expand = c(0, 0), limits = c(0, 16)) + theme(legend.title=element_blank(), legend.position="STA_Bottom") + scale_color_manual(labels = c("UVM Buoy Site STA_Surface (0.5 meter depth)", "UVM Buoy Site STA_Bottom (8.5 meter depth)"), values=(c("UVM Buoy Site STA_Surface (0.5 meter depth)"="blue", "UVM Buoy Site STA_Bottom (8.5 meter depth)"="red")))
 #ggplotly(DO) %>% layout(legend=list(xanchor="STA_Bottom", yanchor="STA_Bottom",y=0.01,xanchor="left",x=0.01))
@@ -311,43 +248,20 @@ STA_DOPlot2$Depth <- ifelse(STA_DOPlot2$depth < 0.8, "0.5m",
                         ifelse(STA_DOPlot2$depth>2.4 & STA_DOPlot2$depth<2.9, "2.5m",
                         ifelse(STA_DOPlot2$depth>2.9 & STA_DOPlot2$depth<3.4, "3.0m",
                         ifelse(STA_DOPlot2$depth>3.4 & STA_DOPlot2$depth<3.8, "3.5m",
-                        ifelse(STA_DOPlot2$depth>3.8 & STA_DOPlot2$depth<4.4, "4.0m",       
-                               "4.5m"))))))))
+                               "4.0m")))))))
 #Plot of 0.5, 4.0 meters
-STA_DOPlot3 <- subset(STA_DOPlot2,Depth=="0.5m" |Depth=="4.5m")
+STA_DOPlot3 <- subset(STA_DOPlot2,Depth=="0.5m" |Depth=="4.0m")
 STA_DO2 <- ggplot(STA_DOPlot3,aes(x=Date,y=DO),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Saint Albans Bay Dissolved Oxygen", y="Dissolved Oxygen (mg/L)", x="Date") + scale_y_continuous(breaks=seq(0,16,2), expand = c(0, 0), limits = c(0, 16)) + scale_color_brewer(palette="Set1")
 #GGPlot Setup (Temp) 
-STA_Temp <- ggplot(STA_DOPlot3, aes(x=Date,y=Temp),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Saint Albans Bay Water Temperature", y="Temperature (*C)", x="Date") + scale_y_continuous(breaks=seq(5,35,5),limits = c(5,35)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_brewer(palette="Set1") 
+STA_Temp <- ggplot(STA_DOPlot3, aes(x=Date,y=Temp),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Saint Albans Bay Water Temperature", y="Temperature (*C)", x="Date") + scale_y_continuous(breaks=seq(15,35,5),limits = c(15,35)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_brewer(palette="Set1") 
 #MB Plot Setup
 #Subset MB_Surface and MB_Bottom DO measurements
-MB_DOPlot <- subset(MB_DO,depth>2.4 | depth<1.4)
-MB_DOPlot$Depth <- ifelse(MB_DOPlot$depth<1.4, "1.0m", "2.5m")
+MB_DOPlot <- subset(MB_DO,depth>1.8 | depth<0.8)
+MB_DOPlot$Depth <- ifelse(MB_DOPlot$depth<0.8, "0.5m", "2.0m")
 #Create new dataset with Date, BGA PC, depth columns.
 MB_PC<-MBdata[,c(1,21,19,15)]
-#Create new dataset with Date, CHLA, BGA PC, depth columns.
-MB_PC<-MBdata[,c(1,18,20,21)]
 #Subset STA_Surface BGA PC measurements
-MB_PCPlot <- subset(MB_PC,depth<1.4 & depth>0.8)
-MB_PCPlot2<-MB_PCPlot %>% select(Date,PC) %>% mutate(PCavg=rollmean(PC,k=24,fill=NA))
-NewMB_PCPlot<-MB_PCPlot%>% select(Date,PC,depth)
-NewMB_PCPlot$depth <- "Profiler Measurement"
-names(NewMB_PCPlot)[3] <- "Data"
-MB_PCPlot2$PC <- MB_PCPlot2$PCavg
-MB_PCPlot2$PCavg <- "24 Hr Average"
-names(MB_PCPlot2)[3] <- "Data"
-NewMB_PCPlot<-rbind(NewMB_PCPlot,MB_PCPlot2)
-NewMB_PCPlot$PC <- round(NewMB_PCPlot$PC,digits=2)
-NewMB_PCPlot$PC <- as.numeric(NewMB_PCPlot$PC)
-MB_ChlPlot<-MB_PCPlot %>% select(Date,Chl) %>% mutate(Chlavg=rollmean(Chl,k=24,fill=NA))
-MB_ChlPlot2<-MB_PCPlot %>% select(Date,Chl,depth)
-MB_ChlPlot2$depth <- "Profiler Measurement"
-names(MB_ChlPlot2)[3] <- "Data"
-MB_ChlPlot$Chl <- MB_ChlPlot$Chlavg
-MB_ChlPlot$Chlavg <- "24 Hr Average"
-names(MB_ChlPlot)[3] <- "Data"
-MB_ChlPlot2<-rbind(MB_ChlPlot2,MB_ChlPlot)
-MB_ChlPlot2$Chl <- round(MB_ChlPlot2$Chl,digits=2)
-MB_ChlPlot2$Chl <- as.numeric(MB_ChlPlot2$Chl)
+MB_PCPlot <- subset(MB_PC,depth<0.8)
 #GGPlot Setup (DO) Original STA_Surface and STA_Bottom Values Hidden
 #DO <- ggplot(MB_DOPlot, aes(x=Date,y=DO)) + geom_line(aes(col=Depth)) + labs(title="Lake Carmi Dissolved Oxygen", y="DO (mg/L)", x="Date") + scale_y_continuous(breaks=seq(0,16,2), expand = c(0, 0), limits = c(0, 16)) + theme(legend.title=element_blank(), legend.position="STA_Bottom") + scale_color_manual(labels = c("UVM Buoy Site STA_Surface (0.5 meter depth)", "UVM Buoy Site STA_Bottom (8.5 meter depth)"), values=(c("UVM Buoy Site STA_Surface (0.5 meter depth)"="blue", "UVM Buoy Site STA_Bottom (8.5 meter depth)"="red")))
 #ggplotly(DO) %>% layout(legend=list(xanchor="STA_Bottom", yanchor="STA_Bottom",y=0.01,xanchor="left",x=0.01))
@@ -355,16 +269,14 @@ MB_ChlPlot2$Chl <- as.numeric(MB_ChlPlot2$Chl)
 MB_DOPlot2 <-MB_DO
 MB_DOPlot2$Depth <- ifelse(MB_DOPlot2$depth < 0.8, "0.5m",
                         ifelse(MB_DOPlot2$depth>0.8 & MB_DOPlot2$depth<1.3, "1.0m",
-                        ifelse(MB_DOPlot2$depth>1.3 & MB_DOPlot2$depth<1.8, "1.5m", 
-                        ifelse(MB_DOPlot2$depth>1.8 & MB_DOPlot2$depth<2.3, "2.0m", 
-                        ifelse(MB_DOPlot2$depth>2.3 & MB_DOPlot2$depth<2.8, "2.5m", "3.0m")))))
+                        ifelse(MB_DOPlot2$depth>1.3 & MB_DOPlot2$depth<1.8, "1.5m", "2.0m")))
 #Plot of 0.5, 2.0 meters
-MB_DOPlot3 <- subset(MB_DOPlot2,Depth=="1.0m" |Depth=="2.5m")
+MB_DOPlot3 <- subset(MB_DOPlot2,Depth=="0.5m" |Depth=="2.0m")
 MB_DO2 <- ggplot(MB_DOPlot3,aes(x=Date,y=DO),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Missisquoi Bay Dissolved Oxygen", y="Dissolved Oxygen (mg/L)", x="Date", Depth="Legend") + scale_y_continuous(breaks=seq(0,16,2), expand = c(0, 0), limits = c(0, 16)) + scale_color_brewer(palette="Set1")
 #GGPlot Setup (Temp) 
-MB_Temp <- ggplot(MB_DOPlot3, aes(x=Date,y=Temp),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Missisquoi Bay Water Temperature", y="Temperature (*C)", x="Date") + scale_y_continuous(breaks=seq(5,35,5),limits = c(5,35)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_brewer(palette="Set1") 
+MB_Temp <- ggplot(MB_DOPlot3, aes(x=Date,y=Temp),color=Depth) + geom_line(aes(col=Depth)) + labs(title="Missisquoi Bay Water Temperature", y="Temperature (*C)", x="Date") + scale_y_continuous(breaks=seq(15,35,5),limits = c(15,35)) + theme(legend.title=element_blank(), legend.position="bottom") + scale_color_brewer(palette="Set1") 
 ```
-<div style="overflow: auto"><div style="float: left; overflow: hidden">
+<div style="overflow: auto; border: 1px solid black""><div style="float: left; display: table-cell; border: 1px dashed black; margin-right: auto">
 ```{r, echo=FALSE, message=FALSE}
 ggplotly(STA_DO2, width=380) %>%add_annotations( text="Depth", xref="paper", yref="paper",
                   x=0.05, xanchor="left",
@@ -372,7 +284,7 @@ ggplotly(STA_DO2, width=380) %>%add_annotations( text="Depth", xref="paper", yre
                  legendtitle=TRUE, showarrow=FALSE ) %>%
   layout( legend=list(y=0.05, yanchor="bottom",x=0.05, xanchor="left" ) )
 ```
-</div><div style="float: left; overflow: hidden">
+</div><div style="display: table-cell; border: 1px dashed black;">
 ```{r, echo=FALSE, message=FALSE}
 ggplotly(MB_DO2, width=380) %>%add_annotations( text="Depth", xref="paper", yref="paper",
                   x=0.05, xanchor="left",
@@ -403,31 +315,33 @@ ggplotly(MB_Temp, width=380)%>%add_annotations( text="Depth", xref="paper", yref
 <div style="overflow: auto"><div style="float: left; overflow: hidden">
 ```{r, echo=FALSE, message=FALSE}
 #GGPlot Setup (Saint Albans PC)
-STA_PC <- ggplot(NewSTA_PCPlot,aes(x=Date,y=PC)) + geom_line(aes(col=Data,alpha=Data),size=0.6) + labs(title="Saint Albans Bay Blue Green Algae \nPhycocyanin (~0.5 meters)", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(-2,14,2), limits = c(-2, 14))+ theme(legend.title=element_blank(), legend.position="bottom") + scale_color_manual(values=(c("24 Hr Average"="red","Profiler Measurement"="steelblue2")))+scale_alpha_manual(values = c(1, 0.5))
-ggplotly(STA_PC, width=380) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
+STA_PC <- ggplot(STA_PCPlot, aes(x=Date,y=PC)) + geom_line(colour="steelblue3") + labs(title="St. Albans Bay Blue Green Algae Phycocyanin (~0.5 meters)", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(-2,14,2), limits = c(-2, 14))
+ggplotly(STA_PC, width=380)
 ```
 </div><div style="float: left; overflow: hidden">
 ```{r, echo=FALSE, message=FALSE}
 #GGPlot Setup (Missisquoi PC)
-MB_PC <- ggplot(NewMB_PCPlot,aes(x=Date,y=PC)) + geom_line(aes(col=Data,alpha=Data),size=0.6) + labs(title="Missisquoi Bay Blue Green Algae \nPhycocyanin (~0.5 meters)", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(-2,14,2), limits = c(-2, 14))+ theme(legend.title=element_blank(), legend.position="bottom") + scale_color_manual(values=(c("24 Hr Average"="red","Profiler Measurement"="steelblue2")))+scale_alpha_manual(values = c(1, 0.5))
-ggplotly(MB_PC, width=380) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
+MB_PC <- ggplot(MB_PCPlot, aes(x=Date,y=PC)) + geom_line(colour="steelblue3") + labs(title="Missisquoi Bay Blue Green Algae Phycocyanin (~0.5 meters)", y="PC (RFU)", x="Date") + scale_y_continuous(breaks=seq(-2,14,2), limits = c(-2, 14))
+ggplotly(MB_PC, width=380)
 ```
 </div></div><div style="overflow: auto"><div style="float: left; overflow: hidden">
 ```{r, echo=FALSE, message=FALSE}
 #GGPlot Setup (Saint Albans Chl)
-STA_Chl <- ggplot(STA_ChlPlot2,aes(x=Date,y=Chl)) + geom_line(aes(col=Data,alpha=Data),size=0.6) + labs(title="Saint Albans Bay \nChlorophyll (~0.5 meters)", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(-2,10,2), limits = c(-2, 10))+ theme(legend.title=element_blank(), legend.position="bottom") + scale_color_manual(values=(c("24 Hr Average"="red","Profiler Measurement"="steelblue2")))+scale_alpha_manual(values = c(1, 0.5))
-ggplotly(STA_Chl,width=380) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
+STA_Chl <- ggplot(STA_PCPlot, aes(x=Date,y=Chl)) + geom_line(colour="steelblue3") + labs(title="St. Albans Bay Chlorophyll (~0.5 meters)", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(-2,10,2), limits = c(-2, 10))
+ggplotly(STA_Chl,width=380)
 ```
 </div><div style="float: left; overflow: hidden">
 ```{r, echo=FALSE, message=FALSE}
 #GGPlot Setup (Missisquoi Chl)
-MB_Chl <- ggplot(MB_ChlPlot2,aes(x=Date,y=Chl)) + geom_line(aes(col=Data,alpha=Data),size=0.6) + labs(title="Missisquoi Bay \nChlorophyll (~0.5 meters)", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(-2,10,2), limits = c(-2, 10))+ theme(legend.title=element_blank(), legend.position="bottom") + scale_color_manual(values=(c("24 Hr Average"="red","Profiler Measurement"="steelblue2")))+scale_alpha_manual(values = c(1, 0.5))
-ggplotly(MB_Chl,width=380) %>% layout(legend=list(xanchor="bottom", yanchor="bottom",y=0.01,xanchor="left",x=0.01))
+MB_Chl <- ggplot(MB_PCPlot, aes(x=Date,y=Chl)) + geom_line(colour="steelblue3") + labs(title="Missisquoi Bay Chlorophyll (~0.5 meters)", y="Chl (RFU)", x="Date") + scale_y_continuous(breaks=seq(-2,10,2), limits = c(-2, 10))
+ggplotly(MB_Chl,width=380)
 ```
 </div></div>
 <p style="text-align:center">Please contact us at ashton.kirol@uvm.edu.com and andrew.schroth@uvm.edu with any questions or comments.</p>
+
 <table style="width: 80%; border: 0px; margin-left:auto; margin-right:auto"><tr><td><img src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/images/NSF.png" style="width: 300px"></td><td style="vertical-align: middle">These data and infrastructure are also sourced in research support provided to Andrew Schroth by the National Science Foundation under under VT EPSCoR Grant No. NSF OIA-1556770 and EAR-1561014. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation.</td></tr></table>
 <br>
+
 <script>
 document.getElementById('cover-spin').style.display = 'none';
 </script>
