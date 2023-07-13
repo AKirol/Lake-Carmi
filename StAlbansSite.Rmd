@@ -96,7 +96,7 @@ STAdata$Date<- as.POSIXct(STAdata$Date)
 #Add Year column and select for current year
 STAdata$Year <- STAdata$Date
 STAdata$Year <- format(STAdata$Year, format="%Y")
-STAdata<-subset(STAdata, Year=="2021")
+STAdata<-subset(STAdata, Year=="2023")
 #Format columns as numeric
 STAdata$DO <- as.numeric(STAdata$DO)
 STAdata$depth <- as.numeric(STAdata$depth)
@@ -189,7 +189,7 @@ MBdata$Date<- as.POSIXct(MBdata$Date)
 #Add Year column and select for current year
 MBdata$Year <- MBdata$Date
 MBdata$Year <- format(MBdata$Year, format="%Y")
-MBdata<-subset(MBdata, Year=="2021")
+MBdata<-subset(MBdata, Year=="2023")
 #Format columns as numeric
 MBdata$DO <- as.numeric(MBdata$DO)
 MBdata$depth <- as.numeric(MBdata$depth)
@@ -267,7 +267,7 @@ kable(MB_mytable, align='r',caption="Missisquoi Bay") %>% kable_styling(bootstra
                 position = "right")
 ```
    
-<h2>2021 Lake Condition Plots</h2>
+<h2>2023 Lake Condition Plots</h2>
 Note: click the legend to isolate desired depths for a cleaner look.
 ```{r,echo=FALSE, message=FALSE,warning=FALSE}
 #Plot Setup
