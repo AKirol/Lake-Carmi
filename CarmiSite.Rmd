@@ -106,6 +106,8 @@ carmidata$depth <- as.numeric(carmidata$depth)
 carmidata$Chl <- as.numeric(carmidata$Chl)
 carmidata$PC <- as.numeric(carmidata$PC)
 carmidata$Temp <- as.numeric(carmidata$Temp)
+is.na(carmidata$Temp) <- carmidata$Temp > 100
+
 #Edit to remove gaps
 carmidata2 <- carmidata %>%
   arrange(Date) %>%
