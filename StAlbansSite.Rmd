@@ -53,7 +53,7 @@ document.getElementById('cover-spin').style.display = 'block';
 <img src="https://raw.githubusercontent.com/AKirol/Lake-Carmi/master/Missisquoi.png" style="width: 100%;">
 <p style="text-align:right;">Image: Missisquoi Bay, July 2020</p>
 <h2>Recent Lake Conditions</h2>
-<span style="font-size: 10pt;">Updated at 8:30, 12:30, and 16:30 each day</span>
+<span style="font-size: 10pt;">Updated at 7:45, 11:45, and 15:45 each day</span>
 <br>
 <br>
 ```{r,echo=FALSE, message=FALSE,warning=FALSE}
