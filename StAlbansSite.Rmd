@@ -366,7 +366,7 @@ MB_Temp <- ggplot(MB_DOPlot3, aes(x=Date,y=Temp),color=Depth) + geom_line(aes(co
 ```
 <div style="overflow: auto"><div style="float: left; overflow: hidden">
 ```{r, echo=FALSE, message=FALSE}
-ggplotly(STA_DO2, width=380) %>%add_annotations( text="Depth", xref="paper", yref="paper",
+ggplotly(STA_DO2, width=380) %>%add_annotations(text="", xref="paper", yref="paper",
                   x=0.05, xanchor="left",
                  y=0.2, yanchor="bottom",   
                  legendtitle=TRUE, showarrow=FALSE ) %>%
@@ -374,7 +374,7 @@ ggplotly(STA_DO2, width=380) %>%add_annotations( text="Depth", xref="paper", yre
 ```
 </div><div style="float: left; overflow: hidden">
 ```{r, echo=FALSE, message=FALSE}
-ggplotly(MB_DO2, width=380) %>%add_annotations( text="Depth", xref="paper", yref="paper",
+ggplotly(MB_DO2, width=380) %>%add_annotations( text="", xref="paper", yref="paper",
                   x=0.05, xanchor="left",
                  y=0.2, yanchor="bottom",   
                  legendtitle=TRUE, showarrow=FALSE ) %>%
@@ -382,7 +382,7 @@ ggplotly(MB_DO2, width=380) %>%add_annotations( text="Depth", xref="paper", yref
 ```
 </div></div><div style="overflow: auto"><div style="float: left; overflow: hidden">
 ```{r, echo=FALSE, message=FALSE}
-ggplotly(STA_Temp, width=380) %>%add_annotations( text="Depth", xref="paper", yref="paper",
+ggplotly(STA_Temp, width=380) %>%add_annotations( text="", xref="paper", yref="paper",
                   x=0.05, xanchor="left",
                  y=0.2, yanchor="bottom",   
                  legendtitle=TRUE, showarrow=FALSE ) %>%
@@ -390,7 +390,7 @@ ggplotly(STA_Temp, width=380) %>%add_annotations( text="Depth", xref="paper", yr
 ```
 </div><div style="float: left; overflow: hidden">
 ```{r, echo=FALSE, message=FALSE}
-ggplotly(MB_Temp, width=380)%>%add_annotations( text="Depth", xref="paper", yref="paper",
+ggplotly(MB_Temp, width=380)%>%add_annotations( text="", xref="paper", yref="paper",
                   x=0.05, xanchor="left",
                  y=0.2, yanchor="bottom",   
                  legendtitle=TRUE, showarrow=FALSE ) %>%
